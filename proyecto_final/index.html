@@ -15,530 +15,778 @@
 html, body { height: 100%; background: var(--bg); color: var(--white); font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
 body { display: flex; flex-direction: column; }
 
-/* ── deck ──────────────────────────────────────────────────────── */
-#deck { flex: 1; position: relative; overflow: hidden; }
-.slide { position: absolute; inset: 0; display: flex; opacity: 0; pointer-events: none; transition: opacity .45s ease; }
+/* ── deck + slides ─────────────────────────────────────────────── */
+#deck { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+
+/* Outer slide container — one rule controls visibility */
+.slide {
+  position: absolute; inset: 0; display: flex;
+  opacity: 0; pointer-events: none;
+  transition: opacity .4s ease;
+}
 .slide.active { opacity: 1; pointer-events: auto; }
 
 /* ── nav footer ────────────────────────────────────────────────── */
-footer { background: var(--panel); border-top: 1px solid var(--border); padding: 10px 28px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
-.nav-btn { width: 40px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--white); cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+footer {
+  background: var(--panel); border-top: 1px solid var(--border);
+  padding: 10px 28px; display: flex; align-items: center; gap: 16px; flex-shrink: 0;
+}
+.nav-btn {
+  width: 38px; height: 34px; border-radius: 7px; border: 1px solid var(--border);
+  background: transparent; color: var(--white); cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
 .nav-btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
 .nav-btn:disabled { opacity: .3; cursor: default; }
-#progress-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-#progress-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width .4s ease; }
-#slide-label { font-size: .78rem; color: var(--sub); min-width: 120px; text-align: center; }
-#slide-count { font-size: .75rem; color: var(--gray); font-family: 'Courier New', monospace; min-width: 40px; text-align: right; }
+#prog-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+#prog-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width .4s ease; }
+#slide-label { font-size: .78rem; color: var(--sub); min-width: 130px; text-align: center; }
+#slide-count { font-size: .75rem; color: var(--gray); font-family: monospace; }
 
-/* ─────────────────────────────────────────────────────────────── */
-/* SLIDE TYPES                                                      */
-/* ─────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   SLIDE LAYOUTS
+═══════════════════════════════════════════════════════════════════ */
 
-/* ── S0: Title ─────────────────────────────────────────────────── */
-.s-title { flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 0; background: var(--bg); position: relative; overflow: hidden; }
-.s-title::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle at 1px 1px, rgba(137,180,250,.12) 1px, transparent 0); background-size: 30px 30px; }
-.title-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 24px; max-width: 700px; padding: 40px; }
-.title-badge { font-size: .72rem; letter-spacing: .15em; text-transform: uppercase; color: var(--sub); border: 1px solid var(--border); padding: 5px 16px; border-radius: 20px; }
-.title-h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; line-height: 1.15; color: var(--white); }
+/* ── Title ──────────────────────────────────────────────────────── */
+.s-title {
+  flex-direction: column; align-items: center; justify-content: center;
+  background: var(--bg); position: relative; overflow: hidden;
+}
+.s-title::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(137,180,250,.13) 1px, transparent 0);
+  background-size: 30px 30px; pointer-events: none;
+}
+.title-inner {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  max-width: 680px; padding: 40px; text-align: center;
+}
+.title-badge {
+  font-size: .68rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--sub); border: 1px solid var(--border); padding: 5px 16px; border-radius: 20px;
+}
+.title-h1 { font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 800; line-height: 1.15; }
 .title-h1 span { color: var(--blue); }
-.title-formula { font-family: 'Courier New', monospace; font-size: clamp(.9rem, 1.5vw, 1.15rem); color: var(--yellow); background: rgba(249,226,175,.08); border: 1px solid rgba(249,226,175,.2); padding: 12px 24px; border-radius: 8px; }
-.title-meta { font-size: .8rem; color: var(--gray); }
+.title-formula {
+  font-family: 'Courier New', monospace; font-size: clamp(.88rem, 1.5vw, 1.1rem);
+  color: var(--yellow); background: rgba(249,226,175,.08);
+  border: 1px solid rgba(249,226,175,.22); padding: 12px 24px; border-radius: 8px;
+}
 .title-chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-.chip { font-size: .75rem; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); color: var(--sub); }
+.chip { font-size: .72rem; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); color: var(--sub); }
+.title-meta { font-size: .78rem; color: var(--gray); }
 
-/* ── Concept slides (full-width, 2 columns) ─────────────────────── */
+/* ── Concept (2-column) ─────────────────────────────────────────── */
 .s-concept { background: var(--bg); }
 .concept-grid { display: grid; grid-template-columns: 1fr 1fr; width: 100%; height: 100%; }
-.col { padding: 48px 52px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
-.col-divider { border-left: 1px solid var(--border); }
-.concept-tag { font-size: .65rem; text-transform: uppercase; letter-spacing: .12em; color: var(--blue); font-weight: 600; }
-.concept-h2 { font-size: clamp(1.5rem, 2.5vw, 2.1rem); font-weight: 700; color: var(--white); line-height: 1.2; }
-.concept-body { font-size: .9rem; color: var(--sub); line-height: 1.7; }
-.concept-body strong { color: var(--white); }
-.concept-body code { font-family: 'Courier New', monospace; font-size: .85rem; color: var(--yellow); background: rgba(249,226,175,.1); padding: 1px 6px; border-radius: 4px; }
-.bullet-list { display: flex; flex-direction: column; gap: 10px; }
-.bullet { display: flex; align-items: flex-start; gap: 10px; font-size: .88rem; color: var(--sub); line-height: 1.5; }
-.bullet .icon { flex-shrink: 0; width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: .8rem; }
-.big-formula-box { background: rgba(137,180,250,.07); border: 1px solid rgba(137,180,250,.22); border-radius: 12px; padding: 28px 32px; text-align: center; }
-.big-formula { font-family: 'Courier New', monospace; font-size: clamp(1rem, 1.8vw, 1.4rem); color: var(--yellow); }
-.big-formula-explain { font-size: .82rem; color: var(--sub); margin-top: 12px; line-height: 1.6; }
-.op-list { display: flex; flex-direction: column; gap: 12px; }
-.op-row { display: flex; align-items: flex-start; gap: 14px; }
-.op-sym { font-family: 'Courier New', monospace; font-size: 1rem; color: var(--blue); min-width: 80px; font-weight: 700; }
-.op-def { font-size: .85rem; color: var(--sub); line-height: 1.5; }
-.op-def em { color: var(--white); font-style: normal; font-weight: 600; }
-.pipeline-boxes { display: flex; align-items: center; gap: 0; width: 100%; }
-.pip-box { flex: 1; text-align: center; }
-.pip-inner { border: 1.5px solid; border-radius: 10px; padding: 14px 8px; margin: 0 4px; }
-.pip-icon { font-size: 1.4rem; margin-bottom: 6px; }
-.pip-title { font-size: .78rem; font-weight: 700; }
-.pip-sub { font-size: .68rem; color: var(--sub); margin-top: 4px; line-height: 1.4; }
-.pip-arrow { font-size: 1.4rem; color: var(--gray); flex-shrink: 0; padding: 0 2px; }
-.pip-result { display: flex; gap: 24px; justify-content: center; margin-top: 24px; }
-.pip-res-item { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--sub); }
+.col { padding: 48px 52px; display: flex; flex-direction: column; justify-content: center; gap: 22px; overflow-y: auto; }
+.col-right { border-left: 1px solid var(--border); }
+.c-tag { font-size: .65rem; text-transform: uppercase; letter-spacing: .12em; color: var(--blue); font-weight: 600; }
+.c-h2 { font-size: clamp(1.4rem, 2.4vw, 2rem); font-weight: 700; line-height: 1.2; }
+.c-body { font-size: .88rem; color: var(--sub); line-height: 1.72; }
+.c-body strong { color: var(--white); }
+.c-body code { font-family: monospace; font-size: .84rem; color: var(--yellow); background: rgba(249,226,175,.1); padding: 1px 5px; border-radius: 3px; }
 
-/* ── Split slides (left panel + right graph) ─────────────────────── */
-.s-split { background: var(--bg); }
-.split-left { width: 300px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); padding: 36px 28px; display: flex; flex-direction: column; justify-content: center; gap: 18px; }
-.split-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; position: relative; }
-.split-right svg { width: 100%; height: 100%; }
-.split-tag { font-size: .62rem; text-transform: uppercase; letter-spacing: .12em; color: var(--blue); font-weight: 600; }
-.split-h2 { font-size: 1.2rem; font-weight: 700; color: var(--white); line-height: 1.3; }
-.split-body { font-size: .8rem; color: var(--sub); line-height: 1.65; }
-.split-body code { font-family: 'Courier New', monospace; font-size: .76rem; color: var(--yellow); background: rgba(249,226,175,.1); padding: 1px 5px; border-radius: 3px; }
-.split-body strong { color: var(--white); }
-.info-pill { background: var(--bg); border-radius: 8px; padding: 10px 14px; font-size: .78rem; color: var(--sub); }
-.info-pill .pval { font-family: 'Courier New', monospace; color: var(--yellow); font-size: .82rem; }
+.bullet-list { display: flex; flex-direction: column; gap: 14px; }
+.bullet { display: flex; align-items: flex-start; gap: 12px; }
+.b-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .85rem; flex-shrink: 0; }
+.b-text { font-size: .86rem; color: var(--sub); line-height: 1.6; padding-top: 3px; }
+.b-text strong { color: var(--white); }
 
-/* ── Result slide ───────────────────────────────────────────────── */
-.s-result { flex-direction: column; align-items: center; justify-content: center; gap: 32px; background: var(--bg); }
-.result-badge-big { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 32px 56px; border-radius: 18px; border: 2px solid; }
-.result-badge-big.ok { background: rgba(29,58,42,.6); border-color: var(--green); }
-.result-badge-big.fail { background: rgba(58,29,40,.6); border-color: var(--red); }
-.rb-icon { font-size: 2.8rem; }
-.rb-title { font-size: 1.8rem; font-weight: 800; letter-spacing: .03em; }
-.rb-sub { font-size: .88rem; opacity: .7; font-family: 'Courier New', monospace; }
-.result-detail { max-width: 560px; text-align: center; font-size: .88rem; color: var(--sub); line-height: 1.7; }
-.result-detail .formula { font-family: 'Courier New', monospace; font-size: 1rem; color: var(--yellow); display: block; margin: 8px 0; }
-.ce-box { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px 24px; text-align: left; }
-.ce-box .ce-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .1em; color: var(--gray); margin-bottom: 6px; }
-.ce-box .ce-pref { font-family: 'Courier New', monospace; font-size: .82rem; color: var(--orange); }
-.ce-box .ce-cycle { font-family: 'Courier New', monospace; font-size: .82rem; color: var(--red); margin-top: 4px; }
+.big-fbox {
+  background: rgba(137,180,250,.07); border: 1px solid rgba(137,180,250,.2);
+  border-radius: 14px; padding: 32px; text-align: center; display: flex; flex-direction: column; gap: 14px;
+}
+.big-fbox .bf-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .12em; color: var(--sub); }
+.big-fbox .bf-formula { font-family: 'Courier New', monospace; font-size: clamp(1.1rem, 2vw, 1.5rem); color: var(--yellow); }
+.big-fbox .bf-explain { font-size: .82rem; color: var(--sub); line-height: 1.65; }
+.big-fbox .bf-explain em { color: var(--white); font-style: normal; font-weight: 600; }
+
+.op-list { display: flex; flex-direction: column; gap: 14px; }
+.op-row { display: flex; align-items: flex-start; gap: 16px; }
+.op-sym { font-family: 'Courier New', monospace; font-size: 1rem; color: var(--blue); min-width: 88px; font-weight: 700; flex-shrink: 0; }
+.op-text { font-size: .84rem; color: var(--sub); line-height: 1.55; }
+.op-text em { color: var(--white); font-style: normal; font-weight: 600; }
+
+.info-pill { background: var(--panel); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.ip-label { font-size: .63rem; text-transform: uppercase; letter-spacing: .08em; color: var(--gray); }
+.ip-val { font-family: 'Courier New', monospace; font-size: .9rem; color: var(--yellow); }
+.ip-sub { font-size: .75rem; color: var(--sub); }
+
+/* ── Pipeline slide ─────────────────────────────────────────────── */
+.s-pipeline {
+  flex-direction: column; align-items: center; justify-content: center;
+  background: var(--bg); padding: 40px;
+}
+.pip-wrap { max-width: 960px; width: 100%; display: flex; flex-direction: column; gap: 36px; }
+.pip-title-wrap { text-align: center; display: flex; flex-direction: column; gap: 8px; }
+.pip-flow { display: flex; align-items: center; gap: 0; width: 100%; }
+.pip-box { flex: 1; }
+.pip-inner {
+  margin: 0 5px; border: 1.5px solid; border-radius: 10px;
+  padding: 16px 10px; text-align: center; display: flex; flex-direction: column; gap: 8px;
+}
+.pip-icon { font-size: 1.6rem; }
+.pip-name { font-size: .82rem; font-weight: 700; }
+.pip-sub { font-size: .68rem; color: var(--sub); line-height: 1.4; }
+.pip-arrow { font-size: 1.5rem; color: var(--gray); flex-shrink: 0; padding: 0 2px; }
+.pip-results { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+.pip-res { display: flex; align-items: center; gap: 10px; font-size: .85rem; color: var(--sub); }
+.pip-res code { font-family: monospace; color: var(--orange); font-size: .82rem; }
+
+/* ── Split slides ───────────────────────────────────────────────── */
+.s-split { flex-direction: row; background: var(--bg); }
+.sp-left {
+  width: 310px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border);
+  padding: 36px 28px; display: flex; flex-direction: column; justify-content: center; gap: 18px;
+  overflow-y: auto;
+}
+.sp-tag { font-size: .62rem; text-transform: uppercase; letter-spacing: .12em; color: var(--blue); font-weight: 600; }
+.sp-h2 { font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
+.sp-body { font-size: .8rem; color: var(--sub); line-height: 1.68; }
+.sp-body code { font-family: monospace; font-size: .77rem; color: var(--yellow); background: rgba(249,226,175,.1); padding: 1px 5px; border-radius: 3px; }
+.sp-body strong { color: var(--white); }
+.sp-note { background: var(--bg); border-radius: 7px; padding: 9px 12px; font-size: .73rem; color: var(--sub); }
+.sp-note code { font-family: monospace; color: var(--yellow); }
+.sp-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; min-width: 0; }
+.sp-right svg { width: 100%; height: 100%; }
+
+/* ── Result slides ──────────────────────────────────────────────── */
+.s-result { flex-direction: column; align-items: center; justify-content: center; gap: 28px; background: var(--bg); padding: 40px; }
+.rb-big { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 30px 56px; border-radius: 18px; border: 2px solid; }
+.rb-big.ok  { background: rgba(29,58,42,.6);  border-color: var(--green); }
+.rb-big.fail{ background: rgba(58,29,40,.6);  border-color: var(--red); }
+.rb-icon  { font-size: 2.6rem; }
+.rb-title { font-size: 1.8rem; font-weight: 800; letter-spacing: .02em; }
+.rb-sub   { font-family: monospace; font-size: .9rem; opacity: .7; }
+.r-detail { max-width: 560px; text-align: center; font-size: .87rem; color: var(--sub); line-height: 1.72; display: flex; flex-direction: column; gap: 14px; }
+.r-formula { font-family: monospace; font-size: 1rem; color: var(--yellow); }
+.ce-box { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px 22px; text-align: left; display: flex; flex-direction: column; gap: 6px; }
+.ce-lbl  { font-size: .63rem; text-transform: uppercase; letter-spacing: .1em; color: var(--gray); }
+.ce-pref { font-family: monospace; font-size: .82rem; color: var(--orange); }
+.ce-cyc  { font-family: monospace; font-size: .82rem; color: var(--red); }
 </style>
 </head>
 <body>
-<div id="deck"></div>
+
+<div id="deck"><!-- slides injected by JS --></div>
+
 <footer>
-  <button class="nav-btn" id="btn-prev" onclick="go(cur-1)">←</button>
-  <div id="progress-wrap"><div id="progress-fill"></div></div>
+  <button class="nav-btn" id="btn-prev" onclick="go(cur-1)" disabled>←</button>
+  <div id="prog-wrap"><div id="prog-fill" style="width:0%"></div></div>
   <span id="slide-label"></span>
-  <div id="progress-wrap2" style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div id="progress-fill2" style="height:100%;background:var(--blue);border-radius:2px;transition:width .4s ease"></div></div>
   <span id="slide-count"></span>
   <button class="nav-btn" id="btn-next" onclick="go(cur+1)">→</button>
 </footer>
+
 <script>
-// ── data (2 examples) ─────────────────────────────────────────────
+/* ══════════════════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════════════════ */
 const EX = [
   { name:'Semáforo', phi:'G F verde', neg:'F(G(!verde))',
-    kripke:{states:['rojo','verde','amarillo'],initial:'rojo',
+    kripke:{
+      states:['rojo','verde','amarillo'], initial:'rojo',
       trans:[{f:'rojo',t:'verde'},{f:'verde',t:'amarillo'},{f:'amarillo',t:'rojo'}],
-      labels:{rojo:['rojo'],verde:['verde'],amarillo:['amarillo']}},
-    buchi:{n:2,init:0,trans:[{f:0,g:'!verde',t:1},{f:0,g:'T',t:0},{f:1,g:'!verde',t:1}],acc:[1]},
-    product:{states:[{k:'rojo',b:0},{k:'verde',b:1},{k:'verde',b:0},{k:'amarillo',b:0},{k:'rojo',b:1}],
-      init:[0],trans:[{f:0,t:1},{f:3,t:4},{f:3,t:0},{f:2,t:3},{f:0,t:2},{f:4,t:1}],acc:[1,4]},
-    result:true, ce:null },
+      labels:{rojo:['rojo'],verde:['verde'],amarillo:['amarillo']}
+    },
+    buchi:{ n:2, init:0,
+      trans:[{f:0,g:'!verde',t:1},{f:0,g:'T',t:0},{f:1,g:'!verde',t:1}],
+      acc:[1]
+    },
+    product:{
+      states:[{k:'rojo',b:0},{k:'verde',b:1},{k:'verde',b:0},{k:'amarillo',b:0},{k:'rojo',b:1}],
+      init:[0],
+      trans:[{f:0,t:1},{f:3,t:4},{f:3,t:0},{f:2,t:3},{f:0,t:2},{f:4,t:1}],
+      acc:[1,4]
+    },
+    result:true, ce:null
+  },
   { name:'Protocolo con Bug', phi:'G F grant', neg:'F(G(!grant))',
-    kripke:{states:['idle','request','grant','deny'],initial:'idle',
+    kripke:{
+      states:['idle','request','grant','deny'], initial:'idle',
       trans:[{f:'idle',t:'request'},{f:'request',t:'grant'},{f:'request',t:'deny'},{f:'grant',t:'idle'},{f:'deny',t:'request'}],
-      labels:{idle:[],request:['request'],grant:['grant'],deny:['deny']}},
-    buchi:{n:2,init:0,trans:[{f:0,g:'!grant',t:1},{f:0,g:'T',t:0},{f:1,g:'!grant',t:1}],acc:[1]},
-    product:{states:[{k:'idle',b:0},{k:'request',b:1},{k:'request',b:0},{k:'grant',b:1},{k:'deny',b:1},{k:'grant',b:0},{k:'deny',b:0}],
-      init:[0],trans:[{f:0,t:1},{f:2,t:4},{f:6,t:2},{f:4,t:1},{f:6,t:1},{f:1,t:4},{f:2,t:3},{f:0,t:2},{f:2,t:6},{f:5,t:0},{f:2,t:5},{f:1,t:3}],acc:[1,3,4]},
+      labels:{idle:[],request:['request'],grant:['grant'],deny:['deny']}
+    },
+    buchi:{ n:2, init:0,
+      trans:[{f:0,g:'!grant',t:1},{f:0,g:'T',t:0},{f:1,g:'!grant',t:1}],
+      acc:[1]
+    },
+    product:{
+      states:[{k:'idle',b:0},{k:'request',b:1},{k:'request',b:0},{k:'grant',b:1},{k:'deny',b:1},{k:'grant',b:0},{k:'deny',b:0}],
+      init:[0],
+      trans:[{f:0,t:1},{f:2,t:4},{f:6,t:2},{f:4,t:1},{f:6,t:1},{f:1,t:4},{f:2,t:3},{f:0,t:2},{f:2,t:6},{f:5,t:0},{f:2,t:5},{f:1,t:3}],
+      acc:[1,3,4]
+    },
     result:false,
-    ce:{prefix:[{k:'idle',b:0},{k:'request',b:1},{k:'deny',b:1}],
-        cycle:[{k:'deny',b:1},{k:'request',b:1},{k:'deny',b:1}]} }
+    ce:{
+      prefix:[{k:'idle',b:0},{k:'request',b:1},{k:'deny',b:1}],
+      cycle:[{k:'deny',b:1},{k:'request',b:1},{k:'deny',b:1}]
+    }
+  }
 ];
 
-// ── svg helpers ───────────────────────────────────────────────────
-const C={blue:'#89b4fa',green:'#a6e3a1',red:'#f38ba8',yellow:'#f9e2af',orange:'#fab387',gray:'#585b70',bg:'#1e1e2e',white:'#cdd6f4',sub:'#a6adc8'};
+/* ══════════════════════════════════════════════════════════════════
+   SVG / GRAPH HELPERS
+══════════════════════════════════════════════════════════════════ */
+const C = { blue:'#89b4fa', green:'#a6e3a1', red:'#f38ba8', yellow:'#f9e2af', orange:'#fab387', gray:'#8890a6', bg:'#1e1e2e', white:'#cdd6f4', sub:'#a6adc8' };
 
-function mkDefs(svg){
+function mkDefs(svg) {
   svg.selectAll('defs').remove();
-  const d=svg.append('defs');
-  [['arr','#8890a6'],['arr-g',C.green],['arr-o',C.orange],['arr-r',C.red],['arr-b',C.blue]].forEach(([id,col])=>{
-    d.append('marker').attr('id',id).attr('viewBox','0 -5 10 10').attr('refX',9).attr('refY',0).attr('markerWidth',8).attr('markerHeight',8).attr('orient','auto').append('path').attr('d','M0,-5L10,0L0,5Z').attr('fill',col);
+  const d = svg.append('defs');
+  [['arr',C.gray],['arr-g',C.green],['arr-o',C.orange],['arr-r',C.red],['arr-b',C.blue]].forEach(([id,col]) => {
+    d.append('marker').attr('id',id).attr('viewBox','0 -5 10 10').attr('refX',9).attr('refY',0)
+      .attr('markerWidth',8).attr('markerHeight',8).attr('orient','auto')
+      .append('path').attr('d','M0,-5L10,0L0,5Z').attr('fill',col);
   });
 }
 
-function epath(x1,y1,x2,y2,curv,R,self){
-  const GAP=R+8;
-  if(self) return `M${x1-14},${y1-R} C${x1-44},${y1-R-65} ${x1+44},${y1-R-65} ${x1+14},${y1-R}`;
-  const dx=x2-x1,dy=y2-y1,dist=Math.hypot(dx,dy)||1;
-  if(curv===0) return `M${x1+dx/dist*R},${y1+dy/dist*R} L${x2-dx/dist*GAP},${y2-dy/dist*GAP}`;
-  const nx=-dy/dist,ny=dx/dist;
-  const mx=(x1+x2)/2+nx*curv,my=(y1+y2)/2+ny*curv;
-  const ds=Math.hypot(mx-x1,my-y1)||1,de=Math.hypot(mx-x2,my-y2)||1;
+function epath(x1,y1,x2,y2,curv,R,self) {
+  const GAP = R + 9;
+  if (self) return `M${x1-14},${y1-R} C${x1-44},${y1-R-65} ${x1+44},${y1-R-65} ${x1+14},${y1-R}`;
+  const dx=x2-x1, dy=y2-y1, dist=Math.hypot(dx,dy)||1;
+  if (curv === 0) return `M${x1+dx/dist*R},${y1+dy/dist*R} L${x2-dx/dist*GAP},${y2-dy/dist*GAP}`;
+  const nx=-dy/dist, ny=dx/dist;
+  const mx=(x1+x2)/2+nx*curv, my=(y1+y2)/2+ny*curv;
+  const ds=Math.hypot(mx-x1,my-y1)||1, de=Math.hypot(mx-x2,my-y2)||1;
   return `M${x1+(mx-x1)/ds*R},${y1+(my-y1)/ds*R} Q${mx},${my} ${x2+(mx-x2)/de*GAP},${y2+(my-y2)/de*GAP}`;
 }
 
-function animP(sel,delay,dur=420){sel.each(function(){const el=d3.select(this);let l;try{l=this.getTotalLength();}catch(e){return;}el.attr('stroke-dasharray',l).attr('stroke-dashoffset',l).transition().delay(delay).duration(dur).ease(d3.easeCubicOut).attr('stroke-dashoffset',0);});}
-
-function circPos(n,cx,cy,r){return Array.from({length:n},(_,i)=>({x:cx+r*Math.cos(2*Math.PI*i/n-Math.PI/2),y:cy+r*Math.sin(2*Math.PI*i/n-Math.PI/2)}));}
-function forcePos(nodes,links,cx,cy){
-  const ns=nodes.map((n,i)=>({id:i,...n})),ls=links.map(l=>({source:l.f,target:l.t}));
-  const sim=d3.forceSimulation(ns).force('link',d3.forceLink(ls).id(d=>d.id).distance(90).strength(.9)).force('charge',d3.forceManyBody().strength(-300)).force('center',d3.forceCenter(cx,cy)).force('collide',d3.forceCollide(48)).stop();
-  for(let i=0;i<900;i++)sim.tick();
-  return ns.map(n=>({x:n.x,y:n.y}));
+function animP(sel, delay, dur=400) {
+  sel.each(function() {
+    const el = d3.select(this);
+    let l; try { l = this.getTotalLength(); } catch(e) { return; }
+    el.attr('stroke-dasharray',l).attr('stroke-dashoffset',l)
+      .transition().delay(delay).duration(dur).ease(d3.easeCubicOut).attr('stroke-dashoffset',0);
+  });
 }
 
-const ABBR={idle_idle:'ii',req_idle:'ri',crit_idle:'ci',idle_req:'ir',req_req:'rr',idle_crit:'ic'};
-function ab(s){return ABBR[s]||s;}
+function circPos(n,cx,cy,r) {
+  return Array.from({length:n}, (_,i) => ({ x: cx+r*Math.cos(2*Math.PI*i/n-Math.PI/2), y: cy+r*Math.sin(2*Math.PI*i/n-Math.PI/2) }));
+}
 
-function drawNodes(g,pos,nodes,nodeR,colorFn,labelFn,accSet,initial,anim,baseDelay){
-  // draw acceptance rings first
-  nodes.forEach((_,i)=>{
-    if(!accSet.has(i))return;
-    const{x,y}=pos[i];
-    const ring=g.append('circle').attr('cx',x).attr('cy',y).attr('r',nodeR+8).attr('fill','none').attr('stroke',C.yellow).attr('stroke-width',2.5).attr('stroke-dasharray','6 3');
-    if(anim)ring.attr('opacity',0).transition().delay(baseDelay+i*55).duration(300).attr('opacity',1);
+function forcePos(nodes,links,cx,cy) {
+  const ns = nodes.map((n,i) => ({id:i,...n}));
+  const ls = links.map(l => ({source:l.f, target:l.t}));
+  const sim = d3.forceSimulation(ns)
+    .force('link', d3.forceLink(ls).id(d=>d.id).distance(90).strength(.9))
+    .force('charge', d3.forceManyBody().strength(-300))
+    .force('center', d3.forceCenter(cx,cy))
+    .force('collide', d3.forceCollide(48))
+    .stop();
+  for (let i=0; i<900; i++) sim.tick();
+  return ns.map(n => ({x:n.x, y:n.y}));
+}
+
+const ABBR = {idle_idle:'ii',req_idle:'ri',crit_idle:'ci',idle_req:'ir',req_req:'rr',idle_crit:'ic'};
+function ab(s) { return ABBR[s]||s; }
+
+function drawGraph(svg, pos, nodes, edges, nodeR, nodeFill, nodeLabel, accSet, initIdx, edgeColor, edgeMarker, edgeLabel, anim) {
+  const g = svg.append('g');
+  // edge pass/idx tracking for parallel edges
+  const pCnt={}, pIdx={};
+  edges.forEach(e => { const k=`${e.f}-${e.t}`; pCnt[k]=(pCnt[k]||0)+1; });
+  edges.forEach(e => { const k=`${e.f}-${e.t}`; pIdx[k]=pIdx[k]||0; });
+
+  // draw edges
+  edges.forEach((e,ei) => {
+    const k=`${e.f}-${e.t}`, rk=`${e.t}-${e.f}`;
+    const idx=pIdx[k]++, hasRev=(pCnt[rk]||0)>0;
+    const curv = hasRev ? 38 : (pCnt[k]>1 ? 28*(idx-(pCnt[k]-1)/2) : 0);
+    const x1=pos[e.f].x, y1=pos[e.f].y, x2=pos[e.t].x, y2=pos[e.t].y;
+    const path = g.append('path')
+      .attr('d', epath(x1,y1,x2,y2,curv,nodeR,e.f===e.t))
+      .attr('fill','none').attr('stroke', edgeColor(e)).attr('stroke-width',2)
+      .attr('marker-end',`url(#${edgeMarker(e)})`);
+    if (anim) animP(path, ei*20, 320);
+
+    const lbl = edgeLabel(e);
+    if (lbl) {
+      const isSelf = e.f===e.t;
+      const lx = isSelf ? x1 : (x1+x2)/2+(-(y2-y1)/Math.hypot(x2-x1,y2-y1)||0)*(hasRev?40:22);
+      const ly = isSelf ? y1-nodeR-46 : (y1+y2)/2+((x2-x1)/Math.hypot(x2-x1,y2-y1)||0)*(hasRev?40:22)-(hasRev?22:0);
+      const lt = g.append('text').attr('x',lx).attr('y',ly).attr('text-anchor','middle')
+        .attr('fill',C.sub).attr('font-size',10).attr('font-family','Courier New').text(lbl);
+      if (anim) lt.attr('opacity',0).transition().delay(ei*20+320).duration(200).attr('opacity',1);
+    }
   });
-  nodes.forEach((_,i)=>{
-    const{x,y}=pos[i],col=colorFn(i),d=baseDelay+i*55;
-    const c=g.append('circle').attr('cx',x).attr('cy',y).attr('fill',col).attr('stroke','#13131e').attr('stroke-width',2.5);
-    if(anim){c.attr('r',0).attr('opacity',0).transition().delay(d).duration(300).ease(d3.easeBackOut.overshoot(1.5)).attr('r',nodeR).attr('opacity',1);}
-    else c.attr('r',nodeR);
-    const lbl=labelFn(i),lines=lbl.split('\n');
-    lines.forEach((ln,li)=>{
-      const t=g.append('text').attr('x',x).attr('y',y+(li-(lines.length-1)/2)*13+1).attr('text-anchor','middle').attr('dominant-baseline','middle').attr('fill','#13131e').attr('font-size',lbl.replace('\n','').length>10?7:lbl.replace('\n','').length>6?9:11).attr('font-family','Courier New').attr('font-weight','bold').text(ln);
-      if(anim)t.attr('opacity',0).transition().delay(d+220).duration(200).attr('opacity',1);
+
+  const nd = edges.length*20;
+  // acceptance rings
+  nodes.forEach((_,i) => {
+    if (!accSet.has(i)) return;
+    const {x,y} = pos[i];
+    const ring = g.append('circle').attr('cx',x).attr('cy',y).attr('r',nodeR+9)
+      .attr('fill','none').attr('stroke',C.yellow).attr('stroke-width',2.5).attr('stroke-dasharray','7 3');
+    if (anim) ring.attr('opacity',0).transition().delay(nd+i*50).duration(300).attr('opacity',1);
+  });
+
+  // node circles + labels
+  nodes.forEach((_,i) => {
+    const {x,y} = pos[i], d = nd+i*50;
+    const col = nodeFill(i);
+    const c = g.append('circle').attr('cx',x).attr('cy',y).attr('fill',col).attr('stroke','#13131e').attr('stroke-width',2.5);
+    if (anim) {
+      c.attr('r',0).attr('opacity',0).transition().delay(d).duration(300).ease(d3.easeBackOut.overshoot(1.4)).attr('r',nodeR).attr('opacity',1);
+    } else { c.attr('r',nodeR); }
+
+    const lbl = nodeLabel(i), lines = lbl.split('\n');
+    lines.forEach((ln,li) => {
+      const t = g.append('text')
+        .attr('x',x).attr('y', y+(li-(lines.length-1)/2)*13+1)
+        .attr('text-anchor','middle').attr('dominant-baseline','middle')
+        .attr('fill','#13131e')
+        .attr('font-size', lbl.replace('\n','').length>10?7 : lbl.replace('\n','').length>6?9:11)
+        .attr('font-family','Courier New').attr('font-weight','bold').text(ln);
+      if (anim) t.attr('opacity',0).transition().delay(d+220).duration(200).attr('opacity',1);
     });
   });
-  if(initial>=0){const{x,y}=pos[initial],ang=-Math.PI*.72,D=nodeR+28;const arr=g.append('line').attr('x1',x+Math.cos(ang)*D).attr('y1',y+Math.sin(ang)*D).attr('x2',x+Math.cos(ang)*(nodeR+5)).attr('y2',y+Math.sin(ang)*(nodeR+5)).attr('stroke',C.green).attr('stroke-width',2.5).attr('marker-end','url(#arr-g)');if(anim)arr.attr('opacity',0).transition().delay(baseDelay).duration(300).attr('opacity',1);}
-}
 
-function drawEdges(g,pos,edges,nodeR,colorFn,markerFn,labelFn,anim,baseDelay){
-  const pCnt={},pIdx={};
-  edges.forEach(e=>{const k=`${e.f}-${e.t}`;pCnt[k]=(pCnt[k]||0)+1;});
-  edges.forEach(e=>{const k=`${e.f}-${e.t}`;pIdx[k]=pIdx[k]||0;});
-  edges.forEach((e,ei)=>{
-    const k=`${e.f}-${e.t}`,rk=`${e.t}-${e.f}`;
-    const idx=pIdx[k]++;const hasRev=(pCnt[rk]||0)>0;
-    const curv=hasRev?38:(pCnt[k]>1?28*(idx-(pCnt[k]-1)/2):0);
-    const x1=pos[e.f].x,y1=pos[e.f].y,x2=pos[e.t].x,y2=pos[e.t].y;
-    const path=g.append('path').attr('d',epath(x1,y1,x2,y2,curv,nodeR,e.f===e.t)).attr('fill','none').attr('stroke',colorFn(e)).attr('stroke-width',2).attr('marker-end',`url(#${markerFn(e)})`);
-    if(anim)animP(path,baseDelay+ei*20,300);
-    const lbl=labelFn(e);
-    if(lbl){const isSelf=e.f===e.t;const lx=isSelf?x1:(x1+x2)/2+(-(y2-y1)/Math.hypot(x2-x1,y2-y1)||0)*(hasRev?40:22);const ly=isSelf?y1-nodeR-44:(y1+y2)/2+((x2-x1)/Math.hypot(x2-x1,y2-y1)||0)*(hasRev?40:22)-(hasRev?22:0);const lt=g.append('text').attr('x',lx).attr('y',ly).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',10).attr('font-family','Courier New').text(lbl);if(anim)lt.attr('opacity',0).transition().delay(baseDelay+ei*20+280).duration(200).attr('opacity',1);}
-  });
-}
-
-// ── graph renderers ───────────────────────────────────────────────
-function renderKripke(svgEl, ex, hiNodes=new Set()){
-  const svg=d3.select(svgEl);
-  const bb=svgEl.getBoundingClientRect();
-  const W=bb.width||700,H=bb.height||400;
-  svg.attr('viewBox',`0 0 ${W} ${H}`);
-  svg.selectAll('*').remove(); mkDefs(svg);
-  const k=ex.kripke,n=k.states.length;
-  const r=n<=3?Math.min(W,H)*.3:Math.min(W,H)*.32;
-  const pos=circPos(n,W/2,H/2-10,r);
-  const nodeR=Math.min(W,H)*.085;
-  const g=svg.append('g');
-  const trans=k.trans.map(t=>({f:k.states.indexOf(t.f),t:k.states.indexOf(t.t)}));
-  drawEdges(g,pos,trans,nodeR,()=>C.gray,()=>'arr',()=>'',true,0);
-  drawNodes(g,pos,k.states,nodeR,i=>hiNodes.has(k.states[i])?C.red:(k.states[i]===k.initial?C.green:C.blue),i=>{const lb=(k.labels[k.states[i]]||[]);return ab(k.states[i])+(lb.length?'\n{'+lb.join(',')+'}':'');},new Set(),k.states.indexOf(k.initial),true,trans.length*20);
-  svg.append('text').attr('x',12).attr('y',H-12).attr('fill',C.sub).attr('font-size',11).attr('opacity',0).text(`M: ${n} estados · ${k.trans.length} transiciones`).transition().delay(800).duration(400).attr('opacity',1);
-}
-
-function renderBuchi(svgEl, ex){
-  const svg=d3.select(svgEl);
-  const bb=svgEl.getBoundingClientRect();
-  const W=bb.width||700,H=bb.height||400;
-  svg.attr('viewBox',`0 0 ${W} ${H}`);
-  svg.selectAll('*').remove(); mkDefs(svg);
-  const b=ex.buchi,n=b.n;
-  const pos=n===2?[{x:W*.3,y:H/2},{x:W*.7,y:H/2}]:circPos(n,W/2,H/2,Math.min(W,H)*.28);
-  const nodeR=Math.min(W,H)*.11;
-  const g=svg.append('g');
-  const trans=b.trans.map(t=>({f:t.f,t:t.t,g:t.g}));
-  drawEdges(g,pos,trans,nodeR,()=>C.gray,()=>'arr',e=>e.g,true,0);
-  drawNodes(g,pos,Array.from({length:n}),nodeR,i=>b.acc.includes(i)?C.yellow:C.blue,i=>`q${i}`,new Set(b.acc),b.init,true,trans.length*20);
-  svg.append('text').attr('x',12).attr('y',H-12).attr('fill',C.sub).attr('font-size',11).attr('opacity',0).text(`A(¬φ): ${n} estados · doble círculo = aceptación Büchi`).transition().delay(900).duration(400).attr('opacity',1);
-}
-
-function renderProduct(svgEl, ex, showDFS=false){
-  const svg=d3.select(svgEl);
-  const bb=svgEl.getBoundingClientRect();
-  const W=bb.width||700,H=bb.height||400;
-  svg.attr('viewBox',`0 0 ${W} ${H}`);
-  svg.selectAll('*').remove(); mkDefs(svg);
-  const p=ex.product,n=p.states.length;
-  const pos=n<=5?circPos(n,W/2,H/2,Math.min(W,H)*.33):forcePos(p.states,p.trans,W/2,H/2-10);
-  const nodeR=32;
-  const g=svg.append('g');
-  drawEdges(g,pos,p.trans,nodeR,()=>C.gray,()=>'arr',()=>'',true,0);
-  drawNodes(g,pos,p.states,nodeR,i=>p.acc.includes(i)?C.yellow:C.blue,i=>ab(p.states[i].k)+'\nq'+p.states[i].b,new Set(p.acc),p.init[0],true,p.trans.length*20);
-
-  // DFS animation overlay
-  if(showDFS && ex.ce){
-    const pe=ex.ce.prefix,cy=ex.ce.cycle;
-    const edgesFromPath=list=>list.slice(0,-1).map((s,i)=>{const a=p.states.findIndex(x=>x.k===list[i].k&&x.b===list[i].b),b=p.states.findIndex(x=>x.k===list[i+1].k&&x.b===list[i+1].b);return{f:a,t:b};}).filter(e=>e.f>=0&&e.t>=0);
-    const pEdges=edgesFromPath(pe),cEdges=edgesFromPath(cy);
-    const baseDelay=p.trans.length*20+p.states.length*55+400;
-    // draw prefix trace
-    const og=svg.append('g');
-    pEdges.forEach((e,i)=>{const path=og.append('path').attr('d',epath(pos[e.f].x,pos[e.f].y,pos[e.t].x,pos[e.t].y,0,nodeR+2,e.f===e.t)).attr('fill','none').attr('stroke',C.orange).attr('stroke-width',4).attr('marker-end','url(#arr-o)');animP(path,baseDelay+i*380,400);});
-    // draw cycle trace
-    const rg=svg.append('g');
-    const cycleStart=baseDelay+pEdges.length*380+300;
-    cEdges.forEach((e,i)=>{const path=rg.append('path').attr('d',epath(pos[e.f].x,pos[e.f].y,pos[e.t].x,pos[e.t].y,0,nodeR+2,e.f===e.t)).attr('fill','none').attr('stroke',C.red).attr('stroke-width',4).attr('marker-end','url(#arr-r)');animP(path,cycleStart+i*380,400);});
-    // highlight nodes
-    const prefIdx=pe.map(s=>p.states.findIndex(x=>x.k===s.k&&x.b===s.b));
-    const cycIdx=cy.map(s=>p.states.findIndex(x=>x.k===s.k&&x.b===s.b));
-    setTimeout(()=>{const hg=svg.append('g');prefIdx.forEach((i,j)=>{hg.append('circle').attr('cx',pos[i].x).attr('cy',pos[i].y).attr('r',nodeR).attr('fill',C.orange).attr('stroke','#13131e').attr('stroke-width',2.5).attr('opacity',0).transition().delay(j*80).duration(280).attr('opacity',1);});},baseDelay+pEdges.length*380+100);
-    setTimeout(()=>{const hg=svg.append('g');cycIdx.forEach((i,j)=>{hg.append('circle').attr('cx',pos[i].x).attr('cy',pos[i].y).attr('r',nodeR).attr('fill',C.red).attr('stroke','#13131e').attr('stroke-width',2.5).attr('opacity',0).transition().delay(j*80).duration(280).attr('opacity',1);});},cycleStart+cEdges.length*380+100);
+  // initial arrow
+  if (initIdx >= 0) {
+    const {x,y} = pos[initIdx], ang = -Math.PI*.72, D = nodeR+28;
+    const arr = g.append('line')
+      .attr('x1',x+Math.cos(ang)*D).attr('y1',y+Math.sin(ang)*D)
+      .attr('x2',x+Math.cos(ang)*(nodeR+5)).attr('y2',y+Math.sin(ang)*(nodeR+5))
+      .attr('stroke',C.green).attr('stroke-width',2.5).attr('marker-end','url(#arr-g)');
+    if (anim) arr.attr('opacity',0).transition().delay(nd).duration(300).attr('opacity',1);
   }
-  svg.append('text').attr('x',12).attr('y',H-12).attr('fill',C.sub).attr('font-size',11).attr('opacity',0).text(`M×A: ${n} estados · ${p.acc.length} aceptantes`).transition().delay(1000).duration(400).attr('opacity',1);
+  return g;
 }
 
-// ── slide HTML templates ──────────────────────────────────────────
-function slideTitle(){return`
-<div class="slide s-title">
-  <div class="title-content">
-    <div class="title-badge">PROYECTO FINAL · TEORÍA DE AUTÓMATAS · 2026</div>
-    <h1 class="title-h1">Verificador LTL<br><span>con Autómatas de Büchi</span></h1>
-    <div class="title-formula">M ⊨ φ &nbsp; ⟺ &nbsp; L(M) ∩ L(A<sub>¬φ</sub>) = ∅</div>
-    <div class="title-chips">
-      <span class="chip">LTL · Lógica Temporal</span>
-      <span class="chip">Autómatas de Büchi</span>
-      <span class="chip">Model Checking</span>
-      <span class="chip">Nested DFS</span>
-    </div>
-    <div class="title-meta">Jorge Vasquez &nbsp;·&nbsp; Prof. Tomás de Camino Beck</div>
-  </div>
-</div>`;}
+/* ══════════════════════════════════════════════════════════════════
+   SLIDE RENDERERS
+══════════════════════════════════════════════════════════════════ */
+function getSVGSize(svgEl) {
+  const bb = svgEl.getBoundingClientRect();
+  return { W: bb.width || 600, H: bb.height || 400 };
+}
 
-function slideProblema(){return`
-<div class="slide s-concept">
-  <div class="concept-grid">
-    <div class="col">
-      <div class="concept-tag">El Problema</div>
-      <h2 class="concept-h2">¿Cómo garantizar<br>la corrección de un sistema?</h2>
-      <div class="bullet-list">
-        <div class="bullet"><div class="icon" style="background:rgba(243,139,168,.15)">🔬</div><div><strong style="color:var(--white)">Tests</strong> — solo cubren casos conocidos. Un sistema puede fallar exactamente en el caso que no probamos.</div></div>
-        <div class="bullet"><div class="icon" style="background:rgba(243,139,168,.15)">👁️</div><div><strong style="color:var(--white)">Revisión manual</strong> — impráctica para sistemas con millones de estados posibles.</div></div>
-        <div class="bullet"><div class="icon" style="background:rgba(166,227,161,.15)">✅</div><div><strong style="color:var(--green)">Model Checking</strong> — verificación automática y <em>exhaustiva</em> de todos los comportamientos posibles.</div></div>
+function renderKripke(svgEl, ex, hiStates=new Set()) {
+  const svg = d3.select(svgEl);
+  const {W,H} = getSVGSize(svgEl);
+  svg.attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove(); mkDefs(svg);
+  const k = ex.kripke, n = k.states.length;
+  const r = Math.min(W,H) * (n<=3?.29:.32);
+  const nodeR = Math.min(W,H) * .082;
+  const pos = circPos(n, W/2, H/2-10, r);
+  const trans = k.trans.map(t => ({f:k.states.indexOf(t.f), t:k.states.indexOf(t.t)}));
+  drawGraph(svg, pos, k.states, trans, nodeR,
+    i => hiStates.has(k.states[i]) ? C.red : (k.states[i]===k.initial ? C.green : C.blue),
+    i => { const lb=k.labels[k.states[i]]||[]; return ab(k.states[i])+(lb.length?'\n{'+lb.join(',')+'}':''); },
+    new Set(), k.states.indexOf(k.initial),
+    ()=>C.gray, ()=>'arr', ()=>'', true);
+  svg.append('text').attr('x',12).attr('y',H-12).attr('fill',C.sub).attr('font-size',11)
+    .attr('opacity',0).text(`M: ${n} estados · ${k.trans.length} transiciones`)
+    .transition().delay(800).duration(400).attr('opacity',1);
+}
+
+function renderBuchi(svgEl, ex) {
+  const svg = d3.select(svgEl);
+  const {W,H} = getSVGSize(svgEl);
+  svg.attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove(); mkDefs(svg);
+  const b = ex.buchi, n = b.n;
+  const nodeR = Math.min(W,H) * .11;
+  const pos = n===2 ? [{x:W*.28,y:H/2},{x:W*.72,y:H/2}] : circPos(n,W/2,H/2,Math.min(W,H)*.28);
+  const trans = b.trans.map(t => ({f:t.f, t:t.t, g:t.g}));
+  drawGraph(svg, pos, Array.from({length:n}), trans, nodeR,
+    i => b.acc.includes(i) ? C.yellow : C.blue,
+    i => `q${i}`, new Set(b.acc), b.init,
+    ()=>C.gray, ()=>'arr', e=>e.g, true);
+  svg.append('text').attr('x',12).attr('y',H-12).attr('fill',C.sub).attr('font-size',11)
+    .attr('opacity',0).text(`A(¬φ): ${n} estados · ⊙ = aceptación Büchi`)
+    .transition().delay(900).duration(400).attr('opacity',1);
+}
+
+let _prodPos = {};
+function renderProduct(svgEl, ex, showDFS=false) {
+  const svg = d3.select(svgEl);
+  const {W,H} = getSVGSize(svgEl);
+  svg.attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove(); mkDefs(svg);
+  const p = ex.product, n = p.states.length;
+  const nodeR = 32;
+
+  if (!_prodPos[ex.name] || showDFS) {
+    _prodPos[ex.name] = n<=5 ? circPos(n,W/2,H/2,Math.min(W,H)*.32) : forcePos(p.states,p.trans,W/2,H/2-10);
+  }
+  const pos = _prodPos[ex.name];
+
+  drawGraph(svg, pos, p.states, p.trans, nodeR,
+    i => p.acc.includes(i) ? C.yellow : C.blue,
+    i => ab(p.states[i].k)+'\nq'+p.states[i].b,
+    new Set(p.acc), p.init[0],
+    ()=>C.gray, ()=>'arr', ()=>'', true);
+
+  const baseDelay = p.trans.length*20 + p.states.length*50 + 400;
+
+  if (showDFS && ex.ce) {
+    const toEdges = list => list.slice(0,-1).map((s,i) => {
+      const a=p.states.findIndex(x=>x.k===list[i].k&&x.b===list[i].b);
+      const b=p.states.findIndex(x=>x.k===list[i+1].k&&x.b===list[i+1].b);
+      return {f:a,t:b};
+    }).filter(e=>e.f>=0&&e.t>=0);
+
+    const pEdges = toEdges(ex.ce.prefix);
+    const cEdges = toEdges(ex.ce.cycle);
+    const STEP = 380;
+
+    // prefix (orange)
+    setTimeout(()=>{
+      const og = svg.append('g');
+      pEdges.forEach((e,i) => {
+        const path = og.append('path')
+          .attr('d', epath(pos[e.f].x,pos[e.f].y,pos[e.t].x,pos[e.t].y,0,nodeR+3,e.f===e.t))
+          .attr('fill','none').attr('stroke',C.orange).attr('stroke-width',4)
+          .attr('marker-end','url(#arr-o)');
+        animP(path, i*STEP, 400);
+      });
+    }, baseDelay);
+
+    const cycleStart = baseDelay + pEdges.length*STEP + 300;
+
+    // cycle (red)
+    setTimeout(()=>{
+      const rg = svg.append('g');
+      cEdges.forEach((e,i) => {
+        const path = rg.append('path')
+          .attr('d', epath(pos[e.f].x,pos[e.f].y,pos[e.t].x,pos[e.t].y,0,nodeR+3,e.f===e.t))
+          .attr('fill','none').attr('stroke',C.red).attr('stroke-width',4)
+          .attr('marker-end','url(#arr-r)');
+        animP(path, i*STEP, 400);
+      });
+    }, cycleStart);
+
+    // recolor prefix nodes orange
+    const prefIdx = ex.ce.prefix.map(s=>p.states.findIndex(x=>x.k===s.k&&x.b===s.b));
+    setTimeout(()=>{
+      const hg=svg.append('g');
+      prefIdx.forEach((i,j) => {
+        hg.append('circle').attr('cx',pos[i].x).attr('cy',pos[i].y).attr('r',nodeR)
+          .attr('fill',C.orange).attr('stroke','#13131e').attr('stroke-width',2.5)
+          .attr('opacity',0).transition().delay(j*80).duration(280).attr('opacity',1);
+        // re-draw label on top
+        const lbl=ab(p.states[i].k)+'\nq'+p.states[i].b, lines=lbl.split('\n');
+        lines.forEach((ln,li)=>{
+          hg.append('text').attr('x',pos[i].x).attr('y',pos[i].y+(li-(lines.length-1)/2)*13+1)
+            .attr('text-anchor','middle').attr('dominant-baseline','middle')
+            .attr('fill','#13131e').attr('font-size',9).attr('font-family','Courier New').attr('font-weight','bold').text(ln)
+            .attr('opacity',0).transition().delay(j*80+200).duration(200).attr('opacity',1);
+        });
+      });
+    }, baseDelay + pEdges.length*STEP + 100);
+
+    // recolor cycle nodes red
+    const cycIdx = ex.ce.cycle.map(s=>p.states.findIndex(x=>x.k===s.k&&x.b===s.b));
+    setTimeout(()=>{
+      const hg=svg.append('g');
+      cycIdx.forEach((i,j) => {
+        hg.append('circle').attr('cx',pos[i].x).attr('cy',pos[i].y).attr('r',nodeR)
+          .attr('fill',C.red).attr('stroke','#13131e').attr('stroke-width',2.5)
+          .attr('opacity',0).transition().delay(j*80).duration(280).attr('opacity',1);
+        const lbl=ab(p.states[i].k)+'\nq'+p.states[i].b, lines=lbl.split('\n');
+        lines.forEach((ln,li)=>{
+          hg.append('text').attr('x',pos[i].x).attr('y',pos[i].y+(li-(lines.length-1)/2)*13+1)
+            .attr('text-anchor','middle').attr('dominant-baseline','middle')
+            .attr('fill','#13131e').attr('font-size',9).attr('font-family','Courier New').attr('font-weight','bold').text(ln)
+            .attr('opacity',0).transition().delay(j*80+200).duration(200).attr('opacity',1);
+        });
+      });
+    }, cycleStart + cEdges.length*STEP + 100);
+  }
+
+  svg.append('text').attr('x',12).attr('y',H-12).attr('fill',C.sub).attr('font-size',11)
+    .attr('opacity',0).text(`M×A: ${n} estados · ${p.acc.length} aceptantes`)
+    .transition().delay(1000).duration(400).attr('opacity',1);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SLIDE HTML (content only — outer div added by JS)
+══════════════════════════════════════════════════════════════════ */
+const HTML = {
+
+title: `
+<div class="title-inner">
+  <div class="title-badge">PROYECTO FINAL · TEORÍA DE AUTÓMATAS · 2026</div>
+  <h1 class="title-h1">Verificador LTL<br><span>con Autómatas de Büchi</span></h1>
+  <div class="title-formula">M &thinsp;⊨&thinsp; φ &nbsp;⟺&nbsp; L(M) ∩ L(A<sub>¬φ</sub>) = ∅</div>
+  <div class="title-chips">
+    <span class="chip">LTL · Lógica Temporal</span>
+    <span class="chip">Autómatas de Büchi</span>
+    <span class="chip">Model Checking</span>
+    <span class="chip">Nested DFS</span>
+  </div>
+  <div class="title-meta">Jorge Vasquez &nbsp;·&nbsp; Prof. Tomás de Camino Beck</div>
+</div>`,
+
+problema: `
+<div class="concept-grid">
+  <div class="col">
+    <div class="c-tag">El Problema</div>
+    <h2 class="c-h2">¿Cómo garantizar<br>la corrección de un sistema?</h2>
+    <div class="bullet-list">
+      <div class="bullet">
+        <div class="b-icon" style="background:rgba(243,139,168,.15)">🔬</div>
+        <div class="b-text"><strong>Tests</strong> — solo cubren casos conocidos. El sistema puede fallar exactamente en el caso no probado.</div>
+      </div>
+      <div class="bullet">
+        <div class="b-icon" style="background:rgba(243,139,168,.15)">👁️</div>
+        <div class="b-text"><strong>Revisión manual</strong> — impráctica para sistemas con millones de estados posibles.</div>
+      </div>
+      <div class="bullet">
+        <div class="b-icon" style="background:rgba(166,227,161,.15)">✅</div>
+        <div class="b-text"><strong style="color:var(--green)">Model Checking</strong> — verificación <em>automática y exhaustiva</em> de todos los comportamientos posibles.</div>
       </div>
     </div>
-    <div class="col col-divider" style="align-items:center">
-      <div class="big-formula-box">
-        <div class="concept-tag" style="margin-bottom:12px">La pregunta central</div>
-        <div class="big-formula">M &thinsp;⊨&thinsp; φ ?</div>
-        <div class="big-formula-explain">¿El sistema <strong style="color:var(--blue)">M</strong> satisface la propiedad <strong style="color:var(--yellow)">φ</strong><br>en <em>todos</em> sus comportamientos posibles,<br>incluyendo los que nunca probaríamos?</div>
+  </div>
+  <div class="col col-right" style="align-items:center;justify-content:center">
+    <div class="big-fbox">
+      <div class="bf-label">La pregunta central</div>
+      <div class="bf-formula">M &thinsp;⊨&thinsp; φ ?</div>
+      <div class="bf-explain">
+        ¿El sistema <em>M</em> satisface la propiedad <em>φ</em><br>
+        en <em>todos</em> sus comportamientos posibles,<br>
+        incluyendo los que nunca probaríamos?
       </div>
     </div>
   </div>
-</div>`;}
+</div>`,
 
-function slideLTL(){return`
-<div class="slide s-concept">
-  <div class="concept-grid">
-    <div class="col">
-      <div class="concept-tag">Lógica Temporal Lineal</div>
-      <h2 class="concept-h2">LTL — propiedades sobre trazas infinitas</h2>
-      <div class="op-list">
-        <div class="op-row"><div class="op-sym">G φ</div><div class="op-def"><em>Siempre</em> φ &mdash; φ es verdadero en todos los pasos futuros</div></div>
-        <div class="op-row"><div class="op-sym">F φ</div><div class="op-def"><em>Eventualmente</em> φ &mdash; φ ocurre en algún punto futuro</div></div>
-        <div class="op-row"><div class="op-sym">G F φ</div><div class="op-def"><em>Infinitamente a menudo</em> φ &mdash; φ ocurre infinitas veces</div></div>
-        <div class="op-row"><div class="op-sym">G !φ</div><div class="op-def"><em>Nunca</em> φ &mdash; propiedad de seguridad (safety)</div></div>
-      </div>
-    </div>
-    <div class="col col-divider" style="gap:24px">
-      <div class="concept-tag">Propiedades de los ejemplos</div>
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <div class="info-pill">
-          <div style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Ejemplo 1 — Semáforo</div>
-          <div class="pval">G F verde</div>
-          <div style="font-size:.78rem;color:var(--sub);margin-top:4px">"El semáforo siempre eventualmente llega al verde"</div>
-        </div>
-        <div class="info-pill">
-          <div style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Ejemplo 2 — Protocolo</div>
-          <div class="pval">G F grant</div>
-          <div style="font-size:.78rem;color:var(--sub);margin-top:4px">"Toda solicitud es eventualmente atendida"</div>
-        </div>
-        <div class="info-pill">
-          <div style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Traza infinita — intuición</div>
-          <svg viewBox="0 0 340 70" style="width:100%;overflow:visible">
-            <text x="10" y="20" font-size="11" fill="#585b70" font-family="Courier New">t:  0   1   2   3   4   5   6   7</text>
-            <line x1="10" y1="34" x2="330" y2="34" stroke="#363a4f" stroke-width="1.5"/>
-            ${['r','v','a','r','v','a','r','v'].map((s,i)=>`<circle cx="${28+i*42}" cy="34" r="10" fill="${s==='v'?'#a6e3a1':'#585b70'}"/><text x="${28+i*42}" y="38" text-anchor="middle" font-size="9" font-family="Courier New" fill="#13131e" font-weight="bold">${s}</text>`).join('')}
-            <text x="10" y="58" font-size="10" fill="#a6adc8">G F verde ✅ — verde aparece infinitamente</text>
-          </svg>
-        </div>
-      </div>
+ltl: `
+<div class="concept-grid">
+  <div class="col">
+    <div class="c-tag">Lógica Temporal Lineal</div>
+    <h2 class="c-h2">LTL — propiedades<br>sobre trazas infinitas</h2>
+    <div class="op-list">
+      <div class="op-row"><div class="op-sym">G φ</div><div class="op-text"><em>Siempre</em> φ — verdadero en todos los pasos futuros</div></div>
+      <div class="op-row"><div class="op-sym">F φ</div><div class="op-text"><em>Eventualmente</em> φ — ocurre en algún punto futuro</div></div>
+      <div class="op-row"><div class="op-sym">G F φ</div><div class="op-text"><em>Infinitamente a menudo</em> φ — ocurre infinitas veces</div></div>
+      <div class="op-row"><div class="op-sym">! φ</div><div class="op-text">Negación de φ</div></div>
     </div>
   </div>
-</div>`;}
-
-function slideAlgoritmo(){return`
-<div class="slide s-concept" style="align-items:center;justify-content:center">
-  <div style="max-width:900px;width:100%;padding:48px 40px;display:flex;flex-direction:column;gap:32px">
-    <div style="text-align:center">
-      <div class="concept-tag" style="display:inline-block;margin-bottom:12px">El Motor</div>
-      <h2 class="concept-h2">Pipeline de verificación — 5 etapas</h2>
+  <div class="col col-right" style="gap:18px">
+    <div class="c-tag">Propiedades de los ejemplos</div>
+    <div class="info-pill">
+      <div class="ip-label">Ejemplo 1 — Semáforo ✅</div>
+      <div class="ip-val">G F verde</div>
+      <div class="ip-sub">"El semáforo siempre eventualmente llega al verde"</div>
     </div>
-    <div class="pipeline-boxes">
-      <div class="pip-box"><div class="pip-inner" style="border-color:#5a7abf;color:#89b4fa"><div class="pip-icon">🔷</div><div class="pip-title">Sistema M</div><div class="pip-sub">Estructura de Kripke<br>estados + transiciones</div></div></div>
-      <div class="pip-arrow">→</div>
-      <div class="pip-box"><div class="pip-inner" style="border-color:#c07d4a;color:#fab387"><div class="pip-icon">¬</div><div class="pip-title">Negar φ</div><div class="pip-sub">Forma Normal<br>Negativa (NNF)</div></div></div>
-      <div class="pip-arrow">→</div>
-      <div class="pip-box"><div class="pip-inner" style="border-color:#8e6cbf;color:#cba6f7"><div class="pip-icon">🤖</div><div class="pip-title">Büchi A(¬φ)</div><div class="pip-sub">GPVW 1995<br>detecta violaciones</div></div></div>
-      <div class="pip-arrow">→</div>
-      <div class="pip-box"><div class="pip-inner" style="border-color:#b09a50;color:#f9e2af"><div class="pip-icon">✕</div><div class="pip-title">Producto M×A</div><div class="pip-sub">combina sistema<br>y autómata</div></div></div>
-      <div class="pip-arrow">→</div>
-      <div class="pip-box"><div class="pip-inner" style="border-color:#4aaf6a;color:#a6e3a1"><div class="pip-icon">🔍</div><div class="pip-title">Nested DFS</div><div class="pip-sub">busca ciclo<br>aceptante</div></div></div>
+    <div class="info-pill">
+      <div class="ip-label">Ejemplo 2 — Protocolo con Bug ❌</div>
+      <div class="ip-val">G F grant</div>
+      <div class="ip-sub">"Toda solicitud es eventualmente atendida"</div>
     </div>
-    <div class="pip-result">
-      <div class="pip-res-item"><span style="color:var(--green);font-size:1.2rem">✅</span> <span><strong style="color:var(--green)">Verificado</strong> — no existe ciclo aceptante → M ⊨ φ en <em>todos</em> los comportamientos</span></div>
-      <div class="pip-res-item"><span style="color:var(--red);font-size:1.2rem">❌</span> <span><strong style="color:var(--red)">Violado</strong> — ciclo encontrado → contraejemplo concreto: <code style="font-family:Courier New;color:var(--orange)">(prefijo · ciclo)^ω</code></span></div>
+    <div class="info-pill">
+      <div class="ip-label">Traza — intuición visual</div>
+      <svg viewBox="0 0 320 68" style="width:100%;overflow:visible;margin-top:4px">
+        <line x1="8" y1="38" x2="310" y2="38" stroke="#363a4f" stroke-width="1.5"/>
+        ${['r','v','a','r','v','a','r','v'].map((s,i)=>`<circle cx="${18+i*38}" cy="38" r="12" fill="${s==='v'?'#a6e3a1':'#585b70'}"/><text x="${18+i*38}" y="42" text-anchor="middle" font-size="10" font-family="Courier New" fill="#13131e" font-weight="bold">${s}</text>`).join('')}
+        <text x="8" y="62" font-size="10" fill="#a6adc8" font-family="Courier New">G F verde: verde aparece infinitamente ✅</text>
+      </svg>
     </div>
   </div>
-</div>`;}
+</div>`,
 
-function slideSplit(tag, h2, body, svgId, footNote=''){return`
-<div class="slide s-split">
-  <div class="split-left">
-    <div class="split-tag">${tag}</div>
-    <div class="split-h2">${h2}</div>
-    <div class="split-body">${body}</div>
-    ${footNote?`<div class="info-pill" style="margin-top:8px;font-size:.73rem">${footNote}</div>`:''}
+pipeline: `
+<div class="pip-wrap">
+  <div class="pip-title-wrap">
+    <div class="c-tag" style="text-align:center">El Motor</div>
+    <h2 class="c-h2" style="text-align:center">Pipeline de verificación</h2>
   </div>
-  <div class="split-right">
-    <svg id="${svgId}" style="width:100%;height:100%"></svg>
+  <div class="pip-flow">
+    <div class="pip-box"><div class="pip-inner" style="border-color:#5a7abf;color:#89b4fa">
+      <div class="pip-icon">🔷</div><div class="pip-name">Sistema M</div><div class="pip-sub">Estructura de Kripke<br>estados + transiciones</div>
+    </div></div>
+    <div class="pip-arrow">→</div>
+    <div class="pip-box"><div class="pip-inner" style="border-color:#c07d4a;color:#fab387">
+      <div class="pip-icon">¬</div><div class="pip-name">Negar φ</div><div class="pip-sub">Forma Normal<br>Negativa (NNF)</div>
+    </div></div>
+    <div class="pip-arrow">→</div>
+    <div class="pip-box"><div class="pip-inner" style="border-color:#8e6cbf;color:#cba6f7">
+      <div class="pip-icon">🤖</div><div class="pip-name">Büchi A(¬φ)</div><div class="pip-sub">GPVW 1995<br>detecta violaciones</div>
+    </div></div>
+    <div class="pip-arrow">→</div>
+    <div class="pip-box"><div class="pip-inner" style="border-color:#b09a50;color:#f9e2af">
+      <div class="pip-icon">✕</div><div class="pip-name">Producto M×A</div><div class="pip-sub">combina sistema<br>y autómata</div>
+    </div></div>
+    <div class="pip-arrow">→</div>
+    <div class="pip-box"><div class="pip-inner" style="border-color:#4aaf6a;color:#a6e3a1">
+      <div class="pip-icon">🔍</div><div class="pip-name">Nested DFS</div><div class="pip-sub">busca ciclo<br>aceptante O(|V|+|E|)</div>
+    </div></div>
   </div>
-</div>`;}
+  <div class="pip-results">
+    <div class="pip-res"><span style="color:var(--green);font-size:1.2rem">✅</span><span><strong style="color:var(--green)">Verificado</strong> — no hay ciclo aceptante → M ⊨ φ en todos los comportamientos</span></div>
+    <div class="pip-res"><span style="color:var(--red);font-size:1.2rem">❌</span><span><strong style="color:var(--red)">Violado</strong> — ciclo encontrado → contraejemplo <code>(prefijo · ciclo)^ω</code></span></div>
+  </div>
+</div>`,
 
-function slideResultOk(ex){return`
-<div class="slide s-result">
-  <div class="result-badge-big ok">
-    <div class="rb-icon">✅</div>
-    <div class="rb-title" style="color:var(--green)">VERIFICADO</div>
-    <div class="rb-sub">${ex.phi}</div>
+ex1kripke: `
+<div class="sp-left">
+  <div class="sp-tag">Ejemplo 1 — Semáforo</div>
+  <div class="sp-h2">Sistema: Semáforo de tráfico</div>
+  <div class="sp-body">
+    <strong>Estados:</strong> rojo → verde → amarillo → rojo → ···<br><br>
+    Las etiquetas indican qué proposición atómica es verdadera en cada estado.<br><br>
+    <strong>Propiedad φ:</strong><br>
+    <code>G F verde</code><br>
+    "El semáforo siempre eventualmente vuelve al verde"<br><br>
+    ¿Se cumple en <em>todos</em> los comportamientos posibles?
   </div>
-  <div class="result-detail">
-    No existe <em>ninguna</em> traza infinita del sistema donde la propiedad falle.
-    <span class="formula">M ⊨ ${ex.phi}</span>
-    Garantía matemática formal en todos los comportamientos posibles,<br>incluyendo los que nunca ocurrirían en pruebas normales.
-  </div>
-</div>`;}
+  <div class="sp-note">φ = <code>G F verde</code></div>
+</div>
+<div class="sp-right"><svg id="svg-k1"></svg></div>`,
 
-function slideResultFail(ex){
-  const pref=ex.ce.prefix.map(s=>s.k).join(' → ');
-  const cyc=ex.ce.cycle.map(s=>s.k).join(' → ');
-  return`
-<div class="slide s-result">
-  <div class="result-badge-big fail">
-    <div class="rb-icon">❌</div>
-    <div class="rb-title" style="color:var(--red)">VIOLADO</div>
-    <div class="rb-sub">${ex.phi} &nbsp; es falsa</div>
+ex1buchi: `
+<div class="sp-left">
+  <div class="sp-tag">Ejemplo 1 — Büchi A(¬φ)</div>
+  <div class="sp-h2">Autómata detector<br>de violaciones</div>
+  <div class="sp-body">
+    Negamos φ: <code>¬(G F verde)</code> = <code>F(G(!verde))</code><br><br>
+    GPVW construye un NBA que acepta exactamente las trazas donde φ falla.<br><br>
+    El estado <span style="color:var(--yellow)">q₁</span> (doble círculo) es de aceptación — si se visita <em>infinitamente</em>, la traza viola φ.
   </div>
-  <div class="result-detail">
-    Se encontró una traza infinita donde la solicitud <em>nunca</em> es atendida:
-    <div class="ce-box" style="margin-top:12px">
-      <div class="ce-label">Contraejemplo</div>
-      <div class="ce-pref">Prefijo: ${pref}</div>
-      <div class="ce-cycle">Ciclo: (${cyc})^ω</div>
-    </div>
-    <div style="margin-top:12px;font-size:.8rem">El sistema puede quedar atrapado indefinidamente en <code style="font-family:Courier New;color:var(--red)">deny → request → deny → ...</code><br>sin nunca llegar al estado <code style="font-family:Courier New;color:var(--yellow)">grant</code>.</div>
-  </div>
-</div>`;}
+  <div class="sp-note">Mismo algoritmo que <code>SPIN</code> y <code>LTL2BA</code> (GPVW 1995)</div>
+</div>
+<div class="sp-right"><svg id="svg-b1"></svg></div>`,
 
-// ── slide definitions ─────────────────────────────────────────────
+ex1product: `
+<div class="sp-left">
+  <div class="sp-tag">Ejemplo 1 — Producto M×A</div>
+  <div class="sp-h2">No hay ciclo aceptante</div>
+  <div class="sp-body">
+    El producto combina sistema y Büchi: un estado <code>(s,q)</code> es aceptante si <code>q ∈ F</code>.<br><br>
+    El Nested DFS busca un ciclo que pase por un estado aceptante (doble círculo amarillo).<br><br>
+    <strong style="color:var(--green)">Resultado:</strong> ningún ciclo aceptante → la propiedad se cumple siempre.
+  </div>
+  <div class="sp-note">5 estados · 2 aceptantes · ningún ciclo encontrado</div>
+</div>
+<div class="sp-right"><svg id="svg-p1"></svg></div>`,
+
+ex1result: `
+<div class="rb-big ok">
+  <div class="rb-icon">✅</div>
+  <div class="rb-title" style="color:var(--green)">VERIFICADO</div>
+  <div class="rb-sub">G F verde</div>
+</div>
+<div class="r-detail">
+  No existe <em>ninguna</em> traza infinita del sistema donde la propiedad falle.
+  <span class="r-formula">M ⊨ G F verde</span>
+  Garantía matemática formal en <strong>todos</strong> los comportamientos posibles,<br>incluyendo los que nunca ocurrirían en pruebas normales.
+</div>`,
+
+ex2kripke: `
+<div class="sp-left">
+  <div class="sp-tag">Ejemplo 2 — Protocolo con Bug</div>
+  <div class="sp-h2">Sistema: protocolo de solicitudes</div>
+  <div class="sp-body">
+    <strong>Estados:</strong> idle → request → grant/deny<br><br>
+    El bug: desde <code>deny</code> se regresa a <code>request</code>, que puede volver a <code>deny</code> — indefinidamente.<br><br>
+    <strong>Propiedad φ:</strong><br>
+    <code>G F grant</code><br>
+    "Toda solicitud es eventualmente atendida"
+  </div>
+  <div class="sp-note">¿Puede el sistema ignorar solicitudes para siempre?</div>
+</div>
+<div class="sp-right"><svg id="svg-k2"></svg></div>`,
+
+ex2dfs: `
+<div class="sp-left">
+  <div class="sp-tag">Ejemplo 2 — Nested DFS</div>
+  <div class="sp-h2">Ciclo aceptante encontrado</div>
+  <div class="sp-body">
+    DFS exterior <span style="color:var(--orange)">━━</span> llega al estado aceptante <code>(deny, q₁)</code>.<br><br>
+    DFS interior <span style="color:var(--red)">━━</span> detecta el ciclo:<br>
+    <code style="color:var(--red)">deny → request → deny → ···</code><br><br>
+    Este ciclo pasa por el estado aceptante <em>infinitamente</em> — evidencia formal del bug.
+  </div>
+  <div class="sp-note">Prefijo: <code>idle→request→deny</code><br>Ciclo: <code>(deny→request→deny)^ω</code></div>
+</div>
+<div class="sp-right"><svg id="svg-p2"></svg></div>`,
+
+ex2result: `
+<div class="rb-big fail">
+  <div class="rb-icon">❌</div>
+  <div class="rb-title" style="color:var(--red)">VIOLADO</div>
+  <div class="rb-sub">G F grant — la propiedad es falsa</div>
+</div>
+<div class="r-detail">
+  El sistema puede quedarse atrapado indefinidamente sin atender solicitudes.
+  <div class="ce-box">
+    <div class="ce-lbl">Contraejemplo formal</div>
+    <div class="ce-pref">Prefijo: idle → request → deny</div>
+    <div class="ce-cyc">Ciclo: (deny → request → deny)^ω</div>
+  </div>
+  Esta traza infinita es verificable y reproducible — la solicitud <code style="color:var(--red)">grant</code> nunca llega.
+</div>`
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   SLIDE DEFINITIONS
+══════════════════════════════════════════════════════════════════ */
 const SLIDES = [
-  { label:'Inicio', html: slideTitle() },
-  { label:'El Problema', html: slideProblema() },
-  { label:'LTL', html: slideLTL() },
-  { label:'El Algoritmo', html: slideAlgoritmo() },
-  // Example 1: Semáforo
-  { label:'Ej.1 Sistema', html: slideSplit(
-      'Ejemplo 1 — Semáforo ✅',
-      'Sistema: Semáforo de tráfico',
-      `<strong>Estados:</strong> rojo → verde → amarillo → rojo → ···<br><br>
-       <strong>Propiedad φ:</strong> <code>G F verde</code><br>
-       "El semáforo siempre eventualmente vuelve al verde"<br><br>
-       Verificamos si esta propiedad se cumple en <em>todos</em> los comportamientos posibles del sistema.`,
-      'svg-k1',
-      `<span style="color:var(--sub)">φ = </span><code>G F verde</code>`
-    ),
+  { label:'Introducción',   type:'s-title',    html: HTML.title },
+  { label:'El Problema',    type:'s-concept',  html: HTML.problema },
+  { label:'LTL',            type:'s-concept',  html: HTML.ltl },
+  { label:'El Algoritmo',   type:'s-pipeline', html: HTML.pipeline },
+
+  { label:'Ej1: Sistema',   type:'s-split',    html: HTML.ex1kripke,
     onEnter: el => renderKripke(el.querySelector('#svg-k1'), EX[0]) },
-  { label:'Ej.1 Büchi', html: slideSplit(
-      'Ejemplo 1 — Autómata de Büchi',
-      'A(¬φ): detector de violaciones',
-      `Negamos φ: <code>¬(G F verde)</code> = <code>F(G(!verde))</code><br><br>
-       GPVW construye un NBA que acepta exactamente las trazas donde φ falla.<br><br>
-       El estado <span style="color:var(--yellow)">q₁</span> (doble círculo) es de aceptación — si se visita infinitamente, la traza viola φ.`,
-      'svg-b1',
-      `Mismo algoritmo que <code>SPIN</code> y <code>LTL2BA</code>`
-    ),
+  { label:'Ej1: Büchi',     type:'s-split',    html: HTML.ex1buchi,
     onEnter: el => renderBuchi(el.querySelector('#svg-b1'), EX[0]) },
-  { label:'Ej.1 Resultado', html: slideSplit(
-      'Ejemplo 1 — Producto M × A',
-      'No existe ciclo aceptante → ✅',
-      `El producto combina sistema y Büchi: un estado <code>(s,q)</code> es aceptante si <code>q ∈ F</code>.<br><br>
-       El Nested DFS recorre el grafo buscando un ciclo que pase por un estado aceptante (amarillo).<br><br>
-       <strong style="color:var(--green)">Resultado:</strong> ningún ciclo encontrado → <code>G F verde</code> se cumple siempre.`,
-      'svg-p1'
-    ),
+  { label:'Ej1: Producto',  type:'s-split',    html: HTML.ex1product,
     onEnter: el => renderProduct(el.querySelector('#svg-p1'), EX[0], false) },
-  { label:'Semáforo ✅', html: slideResultOk(EX[0]) },
-  // Example 2: Protocolo con Bug
-  { label:'Ej.2 Sistema', html: slideSplit(
-      'Ejemplo 2 — Protocolo con Bug ❌',
-      'Sistema: protocolo de solicitudes',
-      `<strong>Estados:</strong> idle → request → grant/deny<br><br>
-       El problema: desde <code>deny</code> se regresa a <code>request</code>, que puede volver a <code>deny</code> — indefinidamente.<br><br>
-       <strong>Propiedad φ:</strong> <code>G F grant</code><br>
-       "Toda solicitud es eventualmente atendida"`,
-      'svg-k2',
-      `¿Puede el sistema ignorar las solicitudes para siempre?`
-    ),
+  { label:'✅ Verificado',   type:'s-result',   html: HTML.ex1result },
+
+  { label:'Ej2: Sistema',   type:'s-split',    html: HTML.ex2kripke,
     onEnter: el => renderKripke(el.querySelector('#svg-k2'), EX[1]) },
-  { label:'Ej.2 DFS', html: slideSplit(
-      'Ejemplo 2 — Nested DFS',
-      'Ciclo aceptante encontrado → ❌',
-      `El DFS exterior (<span style="color:var(--orange)">naranja</span>) llega al estado aceptante <code>(deny, q₁)</code>.<br><br>
-       El DFS interior (<span style="color:var(--red)">rojo</span>) detecta el ciclo:<br><code>deny → request → deny → ···</code><br><br>
-       Este ciclo pasa por el estado aceptante <em>infinitamente</em> — violación formal de φ.`,
-      'svg-p2'
-    ),
+  { label:'Ej2: Nested DFS',type:'s-split',    html: HTML.ex2dfs,
     alwaysRender: true,
     onEnter: el => renderProduct(el.querySelector('#svg-p2'), EX[1], true) },
-  { label:'Protocolo ❌', html: slideResultFail(EX[1]) },
+  { label:'❌ Violado',      type:'s-result',   html: HTML.ex2result },
 ];
 
-// ── navigation ────────────────────────────────────────────────────
-let cur=0;
-const deck=document.getElementById('deck');
+/* ══════════════════════════════════════════════════════════════════
+   INIT & NAVIGATION
+══════════════════════════════════════════════════════════════════ */
+let cur = 0;
+const deck = document.getElementById('deck');
 
-// build slides
-SLIDES.forEach((s,i)=>{
-  const el=document.createElement('div');
-  el.style.cssText='position:absolute;inset:0;display:flex;opacity:0;pointer-events:none;transition:opacity .45s ease';
-  el.id=`slide-${i}`;
-  el.innerHTML=s.html.trim();
+// Inject slides
+SLIDES.forEach((s,i) => {
+  const el = document.createElement('div');
+  el.className = `slide ${s.type}`;
+  el.id = `slide-${i}`;
+  el.innerHTML = s.html;
   deck.appendChild(el);
 });
 
-function go(n){
-  if(n<0||n>=SLIDES.length)return;
-  document.getElementById(`slide-${cur}`).style.opacity='0';
-  document.getElementById(`slide-${cur}`).style.pointerEvents='none';
-  cur=n;
-  const el=document.getElementById(`slide-${cur}`);
-  el.style.opacity='1';
-  el.style.pointerEvents='auto';
-  const s=SLIDES[cur];
-  if(s.onEnter && (!s._rendered || s.alwaysRender)){
-    s._rendered=true;
-    // small delay so slide is visible before D3 measures size
-    requestAnimationFrame(()=>requestAnimationFrame(()=>s.onEnter(el)));
+function go(n) {
+  if (n < 0 || n >= SLIDES.length) return;
+  document.getElementById(`slide-${cur}`).classList.remove('active');
+  cur = n;
+  const el = document.getElementById(`slide-${cur}`);
+  el.classList.add('active');
+  const s = SLIDES[cur];
+  if (s.onEnter && (!s._rendered || s.alwaysRender)) {
+    s._rendered = true;
+    // wait two frames so the element is painted and has its layout size
+    requestAnimationFrame(() => requestAnimationFrame(() => s.onEnter(el)));
   }
   updateNav();
 }
 
-function updateNav(){
-  const pct=((cur/(SLIDES.length-1))*100).toFixed(1);
-  document.getElementById('progress-fill').style.width=pct+'%';
-  document.getElementById('progress-fill2').style.width=pct+'%';
-  document.getElementById('slide-label').textContent=SLIDES[cur].label;
-  document.getElementById('slide-count').textContent=`${cur+1} / ${SLIDES.length}`;
-  document.getElementById('btn-prev').disabled=cur===0;
-  document.getElementById('btn-next').disabled=cur===SLIDES.length-1;
+function updateNav() {
+  const pct = (cur / (SLIDES.length-1) * 100).toFixed(1);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('slide-label').textContent = SLIDES[cur].label;
+  document.getElementById('slide-count').textContent = `${cur+1} / ${SLIDES.length}`;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === SLIDES.length-1;
 }
 
-document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(cur+1);}
-  if(e.key==='ArrowLeft'){e.preventDefault();go(cur-1);}
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur+1); }
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); go(cur-1); }
 });
 
 go(0);
