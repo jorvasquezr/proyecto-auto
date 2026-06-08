@@ -231,6 +231,7 @@ const EX = [
    SVG / GRAPH HELPERS
 ══════════════════════════════════════════════════════════════════ */
 const C = { blue:'#89b4fa', green:'#a6e3a1', red:'#f38ba8', yellow:'#f9e2af', orange:'#fab387', gray:'#8890a6', bg:'#1e1e2e', white:'#cdd6f4', sub:'#a6adc8' };
+const KPAL = ['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8','#cba6f7','#94e2d5'];
 
 function mkDefs(svg) {
   svg.selectAll('defs').remove();
@@ -267,16 +268,17 @@ function circPos(n,cx,cy,r) {
 }
 
 function forcePos(nodes,links,cx,cy) {
-  const ns = nodes.map((n,i) => ({id:i,...n}));
+  const n = nodes.length;
+  const ns = nodes.map((nd,i) => ({id:i,...nd}));
   const ls = links.map(l => ({source:l.f, target:l.t}));
   const sim = d3.forceSimulation(ns)
-    .force('link', d3.forceLink(ls).id(d=>d.id).distance(90).strength(.9))
-    .force('charge', d3.forceManyBody().strength(-300))
+    .force('link', d3.forceLink(ls).id(d=>d.id).distance(n<=5?90:115).strength(.9))
+    .force('charge', d3.forceManyBody().strength(n<=5?-300:-520))
     .force('center', d3.forceCenter(cx,cy))
-    .force('collide', d3.forceCollide(48))
+    .force('collide', d3.forceCollide(n<=5?48:58))
     .stop();
   for (let i=0; i<900; i++) sim.tick();
-  return ns.map(n => ({x:n.x, y:n.y}));
+  return ns.map(nd => ({x:nd.x, y:nd.y}));
 }
 
 const ABBR = {idle_idle:'ii',req_idle:'ri',crit_idle:'ci',idle_req:'ir',req_req:'rr',idle_crit:'ic'};
@@ -373,8 +375,8 @@ function renderKripke(svgEl, ex, hiStates=new Set()) {
   const pos = circPos(n, W/2, H/2-10, r);
   const trans = k.trans.map(t => ({f:k.states.indexOf(t.f), t:k.states.indexOf(t.t)}));
   drawGraph(svg, pos, k.states, trans, nodeR,
-    i => hiStates.has(k.states[i]) ? C.red : (k.states[i]===k.initial ? C.green : C.blue),
-    i => { const lb=k.labels[k.states[i]]||[]; return ab(k.states[i])+(lb.length?'\n{'+lb.join(',')+'}':''); },
+    i => hiStates.has(k.states[i]) ? C.red : KPAL[i % KPAL.length],
+    i => { const name=k.states[i]; const lb=(k.labels[name]||[]).filter(l=>l!==name); return ab(name)+(lb.length?'\n{'+lb.join(',')+'}':''); },
     new Set(), k.states.indexOf(k.initial),
     ()=>C.gray, ()=>'arr', ()=>'', true);
   svg.append('text').attr('x',12).attr('y',H-12).attr('fill',C.sub).attr('font-size',11)
@@ -405,15 +407,16 @@ function renderProduct(svgEl, ex, showDFS=false) {
   const {W,H} = getSVGSize(svgEl);
   svg.attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove(); mkDefs(svg);
   const p = ex.product, n = p.states.length;
-  const nodeR = 32;
+  const nodeR = n <= 5 ? 32 : 27;
 
   if (!_prodPos[ex.name] || showDFS) {
     _prodPos[ex.name] = n<=5 ? circPos(n,W/2,H/2,Math.min(W,H)*.32) : forcePos(p.states,p.trans,W/2,H/2-10);
   }
   const pos = _prodPos[ex.name];
 
+  const kStates = ex.kripke.states;
   drawGraph(svg, pos, p.states, p.trans, nodeR,
-    i => p.acc.includes(i) ? C.yellow : C.blue,
+    i => { const ki=kStates.indexOf(p.states[i].k); return KPAL[ki%KPAL.length]; },
     i => ab(p.states[i].k)+'\nq'+p.states[i].b,
     new Set(p.acc), p.init[0],
     ()=>C.gray, ()=>'arr', ()=>'', true);
@@ -717,6 +720,54 @@ ex2result: `
     <div class="ce-cyc">Ciclo: (deny → request → deny)^ω</div>
   </div>
   Esta traza infinita es verificable y reproducible — la solicitud <code style="color:var(--red)">grant</code> nunca llega.
+</div>`,
+
+conclusiones: `
+<div class="concept-grid">
+  <div class="col">
+    <div class="c-tag">Conclusiones</div>
+    <h2 class="c-h2">¿Qué aprendimos?</h2>
+    <div class="bullet-list">
+      <div class="bullet">
+        <div class="b-icon" style="background:rgba(137,180,250,.15)">🔷</div>
+        <div class="b-text"><strong>LTL captura comportamiento infinito</strong> — propiedades como vivacidad y seguridad no son expresables con lógica clásica.</div>
+      </div>
+      <div class="bullet">
+        <div class="b-icon" style="background:rgba(203,166,247,.15)">🤖</div>
+        <div class="b-text"><strong>Los Autómatas de Büchi son el puente</strong> — traducen una fórmula lógica en un reconocedor de trazas infinitas.</div>
+      </div>
+      <div class="bullet">
+        <div class="b-icon" style="background:rgba(166,227,161,.15)">🔍</div>
+        <div class="b-text"><strong>Nested DFS es completo y eficiente</strong> — si existe un contraejemplo, lo encuentra en O(|V|+|E|).</div>
+      </div>
+      <div class="bullet">
+        <div class="b-icon" style="background:rgba(243,139,168,.15)">❌</div>
+        <div class="b-text"><strong>Un bug es un ciclo</strong> — la violación de una propiedad de vivacidad siempre corresponde a un ciclo aceptante en el producto.</div>
+      </div>
+    </div>
+  </div>
+  <div class="col col-right" style="gap:20px">
+    <div class="c-tag">Limitaciones y trabajo futuro</div>
+    <div class="bullet-list">
+      <div class="bullet">
+        <div class="b-icon" style="background:rgba(249,226,175,.12)">⚠️</div>
+        <div class="b-text"><strong>Explosión de estados</strong> — el producto M×A crece exponencialmente con el número de procesos concurrentes.</div>
+      </div>
+      <div class="bullet">
+        <div class="b-icon" style="background:rgba(249,226,175,.12)">🔧</div>
+        <div class="b-text"><strong>Conversión LTL→Büchi</strong> — este proyecto usa una conversión simplificada; GPVW completo requiere tableau generalizado.</div>
+      </div>
+      <div class="bullet">
+        <div class="b-icon" style="background:rgba(249,226,175,.12)">🌐</div>
+        <div class="b-text"><strong>Herramientas industriales</strong> — <code>SPIN</code> y <code>NuSMV</code> aplican exactamente esta teoría a sistemas reales con millones de estados, usando reducción de orden parcial y BDDs.</div>
+      </div>
+    </div>
+    <div class="info-pill" style="margin-top:8px">
+      <div class="ip-label">La idea central</div>
+      <div class="ip-val" style="font-size:.82rem;color:var(--white)">M ⊨ φ &nbsp;⟺&nbsp; L(M) ∩ L(A<sub>¬φ</sub>) = ∅</div>
+      <div class="ip-sub">Verificar un sistema = vacuidad de la intersección de dos lenguajes ω-regulares</div>
+    </div>
+  </div>
 </div>`
 };
 
@@ -743,6 +794,7 @@ const SLIDES = [
     alwaysRender: true,
     onEnter: el => renderProduct(el.querySelector('#svg-p2'), EX[1], true) },
   { label:'❌ Violado',      type:'s-result',   html: HTML.ex2result },
+  { label:'Conclusiones',    type:'s-concept',  html: HTML.conclusiones },
 ];
 
 /* ══════════════════════════════════════════════════════════════════
