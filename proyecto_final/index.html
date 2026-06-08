@@ -725,7 +725,7 @@ pipeline: `
     </div></div>
     <div class="pip-arrow">→</div>
     <div class="pip-box"><div class="pip-inner" style="border-color:#8e6cbf;color:#cba6f7">
-      <div class="pip-icon">🤖</div><div class="pip-name">Büchi A(¬φ)</div><div class="pip-sub">GPVW 1995<br>detecta violaciones</div>
+      <div class="pip-icon">🤖</div><div class="pip-name">Büchi A(¬φ)</div><div class="pip-sub">GPVW 1995<br>detecta rechazos</div>
     </div></div>
     <div class="pip-arrow">→</div>
     <div class="pip-box"><div class="pip-inner" style="border-color:#b09a50;color:#f9e2af">
@@ -738,7 +738,7 @@ pipeline: `
   </div>
   <div class="pip-results">
     <div class="pip-res"><span style="color:var(--green);font-size:1.2rem">✅</span><span><strong style="color:var(--green)">Verificado</strong> — no hay ciclo aceptante → M ⊨ φ en todos los comportamientos</span></div>
-    <div class="pip-res"><span style="color:var(--red);font-size:1.2rem">❌</span><span><strong style="color:var(--red)">Violado</strong> — ciclo encontrado → contraejemplo <code>(prefijo · ciclo)^ω</code></span></div>
+    <div class="pip-res"><span style="color:var(--red);font-size:1.2rem">❌</span><span><strong style="color:var(--red)">Rechazado</strong> — ciclo encontrado → contraejemplo <code>(prefijo · ciclo)^ω</code></span></div>
   </div>
 </div>`,
 
@@ -789,7 +789,7 @@ ex1kripke: `
 ex1buchi: `
 <div class="sp-left">
   <div class="sp-tag">Ejemplo 1 — Büchi A(¬φ)</div>
-  <div class="sp-h2">Autómata detector<br>de violaciones</div>
+  <div class="sp-h2">Autómata detector<br>de incumplimientos</div>
   <div class="sp-body">
     Negamos φ: <code>¬(G F verde)</code> = <code>F(G(!verde))</code><br><br>
     GPVW construye un NBA que acepta exactamente las trazas donde φ falla.<br><br>
@@ -856,8 +856,8 @@ ex2dfs: `
 ex2result: `
 <div class="rb-big fail">
   <div class="rb-icon">❌</div>
-  <div class="rb-title" style="color:var(--red)">VIOLADO</div>
-  <div class="rb-sub">G F grant — la propiedad es falsa</div>
+  <div class="rb-title" style="color:var(--red)">RECHAZADO</div>
+  <div class="rb-sub">G F grant — propiedad no satisfecha</div>
 </div>
 <div class="r-detail">
   El sistema puede quedarse atrapado indefinidamente sin atender solicitudes.
@@ -889,7 +889,7 @@ conclusiones: `
       </div>
       <div class="bullet">
         <div class="b-icon" style="background:rgba(243,139,168,.15)">❌</div>
-        <div class="b-text"><strong>Un bug es un ciclo</strong> — la violación de una propiedad de vivacidad siempre corresponde a un ciclo aceptante en el producto.</div>
+        <div class="b-text"><strong>Un bug es un ciclo</strong> — el incumplimiento de una propiedad de vivacidad siempre corresponde a un ciclo aceptante en el producto.</div>
       </div>
     </div>
   </div>
@@ -950,7 +950,7 @@ const SLIDES = [
   { label:'Ej2: Nested DFS',type:'s-split',    html: HTML.ex2dfs,
     alwaysRender: true,
     onEnter: el => renderProduct(el.querySelector('#svg-p2'), EX[1], true) },
-  { label:'❌ Violado',      type:'s-result',   html: HTML.ex2result },
+  { label:'❌ Rechazado',    type:'s-result',   html: HTML.ex2result },
   { label:'Conclusiones',    type:'s-concept',  html: HTML.conclusiones },
 ];
 
