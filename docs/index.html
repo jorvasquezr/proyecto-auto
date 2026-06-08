@@ -395,7 +395,7 @@ function renderBuchi(svgEl, ex) {
   svg.attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove(); mkDefs(svg);
   const b = ex.buchi, n = b.n;
   const nodeR = Math.min(W,H) * .11;
-  const pos = n===2 ? [{x:W*.28,y:H/2},{x:W*.72,y:H/2}] : circPos(n,W/2,H/2,Math.min(W,H)*.28);
+  const pos = n===2 ? [{x:W*.20,y:H/2},{x:W*.80,y:H/2}] : circPos(n,W/2,H/2,Math.min(W,H)*.28);
   const trans = b.trans.map(t => ({f:t.f, t:t.t, g:t.g}));
   drawGraph(svg, pos, Array.from({length:n}), trans, nodeR,
     i => b.acc.includes(i) ? C.yellow : C.blue,
