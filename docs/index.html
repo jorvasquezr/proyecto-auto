@@ -135,6 +135,19 @@ footer {
 .pip-res { display: flex; align-items: center; gap: 10px; font-size: .85rem; color: var(--sub); }
 .pip-res code { font-family: monospace; color: var(--orange); font-size: .82rem; }
 
+/* ── Verify (full-SVG with header bar) ──────────────────────────── */
+.s-verify { flex-direction: column; background: var(--bg); }
+.sv-header {
+  flex-shrink: 0; padding: 14px 36px 10px;
+  display: flex; align-items: center; gap: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.sv-tag { font-size:.62rem; text-transform:uppercase; letter-spacing:.12em; color:var(--blue); font-weight:600; flex-shrink:0; }
+.sv-title { font-size:1rem; font-weight:700; color:var(--white); flex-shrink:0; }
+.sv-desc { font-size:.78rem; color:var(--sub); flex:1; line-height:1.5; }
+.sv-svg { flex:1; min-height:0; display:flex; padding:6px 14px 10px; }
+.sv-svg svg { width:100%; height:100%; }
+
 /* ── Split slides ───────────────────────────────────────────────── */
 .s-split { flex-direction: row; background: var(--bg); }
 .sp-left {
@@ -623,6 +636,140 @@ function renderTrace(svgEl, ex, path, keyState, isVerified) {
 }
 
 /* ══════════════════════════════════════════════════════════════════
+   PRODUCT VERIFY ANIMATION
+══════════════════════════════════════════════════════════════════ */
+function renderProductVerify(svgEl, ex) {
+  clearTraceTimers();
+  const svg = d3.select(svgEl);
+  const {W,H} = getSVGSize(svgEl);
+  svg.attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove(); mkDefs(svg);
+
+  const p = ex.product, n = p.states.length;
+  const nodeR = n <= 5 ? 32 : 27;
+
+  if (!_prodPos[ex.name]) {
+    _prodPos[ex.name] = n<=5
+      ? circPos(n, W/2, H/2, Math.min(W,H)*.34)
+      : forcePos(p.states, p.trans, W/2, H/2-10);
+  }
+  const pos = _prodPos[ex.name];
+  const kStates = ex.kripke.states;
+
+  drawGraph(svg, pos, p.states, p.trans, nodeR,
+    i => { const ks=p.states[i].k; return stateColor(ks, kStates.indexOf(ks)); },
+    i => ab(p.states[i].k)+'\nq'+p.states[i].b,
+    new Set(p.acc), p.init[0],
+    () => C.gray, () => 'arr', () => '', true);
+
+  svg.append('text').attr('x',12).attr('y',H-10).attr('fill',C.sub).attr('font-size',10.5)
+    .attr('opacity',0).text(`M×A: ${n} estados · ${p.acc.length} aceptantes (⊙)`)
+    .transition().delay(900).duration(400).attr('opacity',1);
+
+  const gDelay = p.trans.length*20 + p.states.length*50 + 700;
+  const STEP = 950;
+
+  // token ring
+  const tok = svg.append('circle').attr('r',nodeR+9).attr('fill','none')
+    .attr('stroke',C.white).attr('stroke-width',3).attr('opacity',0);
+  _traceTimers.push(setTimeout(() =>
+    tok.attr('cx',pos[p.init[0]].x).attr('cy',pos[p.init[0]].y)
+       .transition().duration(400).attr('opacity',1), gDelay-250));
+
+  const tokTo = (si, col, d) => _traceTimers.push(setTimeout(() =>
+    tok.transition().duration(Math.round(STEP*.52)).ease(d3.easeCubicInOut)
+      .attr('cx',pos[si].x).attr('cy',pos[si].y)
+      .attr('stroke',col||C.white).attr('stroke-width',col===C.yellow?3:col?4:3), d));
+
+  const ripple = (si, col, d) => _traceTimers.push(setTimeout(() =>
+    [0,260].forEach(off => setTimeout(() =>
+      svg.append('circle').attr('cx',pos[si].x).attr('cy',pos[si].y).attr('r',nodeR+9)
+        .attr('fill','none').attr('stroke',col).attr('stroke-width',2.5).attr('opacity',.85)
+        .transition().duration(720).attr('r',nodeR+32).attr('opacity',0).remove(), off)), d));
+
+  const trail = (fi, ti, col, mk, d) => _traceTimers.push(setTimeout(() => {
+    const path = svg.append('path')
+      .attr('d', epath(pos[fi].x,pos[fi].y,pos[ti].x,pos[ti].y,0,nodeR+5,fi===ti))
+      .attr('fill','none').attr('stroke',col).attr('stroke-width',4.5)
+      .attr('marker-end',`url(#${mk})`).attr('opacity',.9);
+    animP(path, 0, 520);
+  }, d));
+
+  const floatLbl = (si, txt, col, d) => _traceTimers.push(setTimeout(() => {
+    const el = svg.append('text')
+      .attr('x',pos[si].x).attr('y',pos[si].y-nodeR-14)
+      .attr('text-anchor','middle').attr('fill',col)
+      .attr('font-size',10.5).attr('font-family','Courier New').attr('opacity',0).text(txt)
+      .transition().duration(300).attr('opacity',1);
+    setTimeout(() => el.transition().duration(400).attr('opacity',0).remove(), 1500);
+  }, d));
+
+  const conclude = (txt, col, d) => _traceTimers.push(setTimeout(() =>
+    svg.append('text').attr('x',W/2).attr('y',H-10).attr('text-anchor','middle')
+      .attr('fill',col).attr('font-size',13).attr('font-family','Courier New')
+      .attr('font-weight','bold').attr('opacity',0).text(txt)
+      .transition().duration(700).attr('opacity',1), d));
+
+  const recolor = (si, col, d) => _traceTimers.push(setTimeout(() => {
+    svg.append('circle').attr('cx',pos[si].x).attr('cy',pos[si].y).attr('r',nodeR)
+      .attr('fill',col).attr('stroke','#13131e').attr('stroke-width',2.5).attr('opacity',0)
+      .transition().duration(380).attr('opacity',1);
+    const s = ab(p.states[si].k)+'\nq'+p.states[si].b, ls = s.split('\n');
+    ls.forEach((ln,li) => svg.append('text')
+      .attr('x',pos[si].x).attr('y',pos[si].y+(li-(ls.length-1)/2)*13+1)
+      .attr('text-anchor','middle').attr('dominant-baseline','middle')
+      .attr('fill','#13131e').attr('font-size',9).attr('font-family','Courier New')
+      .attr('font-weight','bold').text(ln)
+      .attr('opacity',0).transition().delay(200).duration(200).attr('opacity',1));
+  }, d));
+
+  if (ex.result) {
+    /* ── VERIFIED: Semaphore ─────────────────────────────────────
+       States: 0(rojo,q0)  1(verde,q1)✓  2(verde,q0)  3(amarillo,q0)  4(rojo,q1)✓
+       Edges:  0→1  0→2  2→3  3→4  3→0  4→1
+       Story:  DFS visits 1(acc)→dead end → 4(acc)→leads to 1(visited) → no cycle */
+    let d = gDelay;
+    tokTo(0, null, d); floatLbl(0, 'DFS exterior', C.blue, d+200); d+=STEP;
+
+    trail(0,1,C.blue,'arr-b',d-260); tokTo(1,C.yellow,d);
+    floatLbl(1,'⭐ aceptante — DFS interior',C.yellow,d+200); ripple(1,C.yellow,d+350); d+=STEP;
+    floatLbl(1,'✗ sin sucesores — sin ciclo',C.green,d); d+=STEP*.75;
+
+    trail(0,2,C.blue,'arr-b',d-220); tokTo(2,null,d); d+=STEP;
+    trail(2,3,C.blue,'arr-b',d-220); tokTo(3,null,d); d+=STEP;
+
+    trail(3,4,C.blue,'arr-b',d-220); tokTo(4,C.yellow,d);
+    floatLbl(4,'⭐ aceptante — DFS interior',C.yellow,d+200); ripple(4,C.yellow,d+350); d+=STEP;
+
+    trail(4,1,C.blue,'arr-b',d-220);
+    floatLbl(1,'✗ ya visitado — no hay nuevo ciclo',C.sub,d); d+=STEP*.75;
+
+    _traceTimers.push(setTimeout(()=>tok.transition().duration(500).attr('opacity',0),d));
+    conclude('DFS completo — ningún ciclo aceptante   M ⊨ φ ✅', C.green, d+350);
+
+  } else {
+    /* ── REJECTED: Protocol bug ──────────────────────────────────
+       CE prefix: 0→1→4   CE cycle: 4→1→4
+       Story:  outer DFS 0→1(acc) → inner DFS 1→4→1 CYCLE! */
+    let d = gDelay;
+    tokTo(0, null, d); floatLbl(0,'DFS exterior',C.orange,d+200); d+=STEP;
+
+    trail(0,1,C.orange,'arr-o',d-260); tokTo(1,C.yellow,d);
+    floatLbl(1,'⭐ aceptante — inicia DFS interior',C.yellow,d+200); ripple(1,C.yellow,d+360); d+=STEP;
+
+    trail(1,4,C.orange,'arr-o',d-260); tokTo(4,C.yellow,d);
+    floatLbl(4,'⭐ aceptante',C.yellow,d+200); ripple(4,C.yellow,d+360); d+=STEP;
+
+    trail(4,1,C.red,'arr-r',d-260); tokTo(1,C.red,d);
+    floatLbl(1,'🔴 ¡CICLO ENCONTRADO!',C.red,d+150);
+    ripple(1,C.red,d+300); ripple(1,C.red,d+560); d+=STEP;
+
+    recolor(1,C.red,d); recolor(4,C.red,d+220);
+    _traceTimers.push(setTimeout(()=>tok.transition().duration(500).attr('opacity',0),d+100));
+    conclude('Ciclo aceptante: (request→deny)^ω   φ RECHAZADA ❌', C.red, d+550);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
    SLIDE HTML (content only — outer div added by JS)
 ══════════════════════════════════════════════════════════════════ */
 const HTML = {
@@ -800,17 +947,12 @@ ex1buchi: `
 <div class="sp-right"><svg id="svg-b1"></svg></div>`,
 
 ex1product: `
-<div class="sp-left">
-  <div class="sp-tag">Ejemplo 1 — Producto M×A</div>
-  <div class="sp-h2">No hay ciclo aceptante</div>
-  <div class="sp-body">
-    El producto combina sistema y Büchi: un estado <code>(s,q)</code> es aceptante si <code>q ∈ F</code>.<br><br>
-    El Nested DFS busca un ciclo que pase por un estado aceptante (doble círculo amarillo).<br><br>
-    <strong style="color:var(--green)">Resultado:</strong> ningún ciclo aceptante → la propiedad se cumple siempre.
-  </div>
-  <div class="sp-note">5 estados · 2 aceptantes · ningún ciclo encontrado</div>
+<div class="sv-header">
+  <span class="sv-tag">Ejemplo 1 — Producto M×A</span>
+  <span class="sv-title">Nested DFS en acción</span>
+  <span class="sv-desc">DFS exterior explora todos los estados &nbsp;·&nbsp; al llegar a un estado ⭐ aceptante lanza DFS interior buscando volver a él &nbsp;·&nbsp; si no puede: sin ciclo → <strong style="color:var(--green)">verificado</strong></span>
 </div>
-<div class="sp-right"><svg id="svg-p1"></svg></div>`,
+<div class="sv-svg"><svg id="svg-p1"></svg></div>`,
 
 ex1result: `
 <div class="rb-big ok">
@@ -840,18 +982,12 @@ ex2kripke: `
 <div class="sp-right"><svg id="svg-k2"></svg></div>`,
 
 ex2dfs: `
-<div class="sp-left">
-  <div class="sp-tag">Ejemplo 2 — Nested DFS</div>
-  <div class="sp-h2">Ciclo aceptante encontrado</div>
-  <div class="sp-body">
-    DFS exterior <span style="color:var(--orange)">━━</span> llega al estado aceptante <code>(deny, q₁)</code>.<br><br>
-    DFS interior <span style="color:var(--red)">━━</span> detecta el ciclo:<br>
-    <code style="color:var(--red)">deny → request → deny → ···</code><br><br>
-    Este ciclo pasa por el estado aceptante <em>infinitamente</em> — evidencia formal del bug.
-  </div>
-  <div class="sp-note">Prefijo: <code>idle→request→deny</code><br>Ciclo: <code>(deny→request→deny)^ω</code></div>
+<div class="sv-header">
+  <span class="sv-tag">Ejemplo 2 — Producto M×A</span>
+  <span class="sv-title">Nested DFS encuentra el ciclo</span>
+  <span class="sv-desc">DFS exterior <span style="color:var(--orange)">━━</span> llega a estado aceptante ⭐ &nbsp;·&nbsp; DFS interior <span style="color:var(--red)">━━</span> detecta el ciclo &nbsp;·&nbsp; ciclo hallado → <strong style="color:var(--red)">rechazado</strong></span>
 </div>
-<div class="sp-right"><svg id="svg-p2"></svg></div>`,
+<div class="sv-svg"><svg id="svg-p2"></svg></div>`,
 
 ex2result: `
 <div class="rb-big fail">
@@ -936,8 +1072,9 @@ const SLIDES = [
       'verde', true) },
   { label:'Ej1: Büchi',     type:'s-split',    html: HTML.ex1buchi,
     onEnter: el => renderBuchi(el.querySelector('#svg-b1'), EX[0]) },
-  { label:'Ej1: Producto',  type:'s-split',    html: HTML.ex1product,
-    onEnter: el => renderProduct(el.querySelector('#svg-p1'), EX[0], false) },
+  { label:'Ej1: Producto',  type:'s-verify',   html: HTML.ex1product,
+    alwaysRender: true,
+    onEnter: el => renderProductVerify(el.querySelector('#svg-p1'), EX[0]) },
   { label:'✅ Verificado',   type:'s-result',   html: HTML.ex1result },
 
   { label:'Ej2: Sistema',   type:'s-split',    html: HTML.ex2kripke,
@@ -947,9 +1084,9 @@ const SLIDES = [
     onEnter: el => renderTrace(el.querySelector('#svg-t2'), EX[1],
       ['idle','request','deny','request','deny','request','deny','request','deny'],
       'grant', false) },
-  { label:'Ej2: Nested DFS',type:'s-split',    html: HTML.ex2dfs,
+  { label:'Ej2: Nested DFS',type:'s-verify',   html: HTML.ex2dfs,
     alwaysRender: true,
-    onEnter: el => renderProduct(el.querySelector('#svg-p2'), EX[1], true) },
+    onEnter: el => renderProductVerify(el.querySelector('#svg-p2'), EX[1]) },
   { label:'❌ Rechazado',    type:'s-result',   html: HTML.ex2result },
   { label:'Conclusiones',    type:'s-concept',  html: HTML.conclusiones },
 ];
