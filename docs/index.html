@@ -232,6 +232,11 @@ const EX = [
 ══════════════════════════════════════════════════════════════════ */
 const C = { blue:'#89b4fa', green:'#a6e3a1', red:'#f38ba8', yellow:'#f9e2af', orange:'#fab387', gray:'#8890a6', bg:'#1e1e2e', white:'#cdd6f4', sub:'#a6adc8' };
 const KPAL = ['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8','#cba6f7','#94e2d5'];
+const SCOL = {
+  rojo:'#f38ba8', verde:'#a6e3a1', amarillo:'#f9e2af',
+  idle:'#89b4fa', request:'#fab387', grant:'#a6e3a1', deny:'#f38ba8'
+};
+function stateColor(name, idx) { return SCOL[name] || KPAL[idx % KPAL.length]; }
 
 function mkDefs(svg) {
   svg.selectAll('defs').remove();
@@ -375,7 +380,7 @@ function renderKripke(svgEl, ex, hiStates=new Set()) {
   const pos = circPos(n, W/2, H/2-10, r);
   const trans = k.trans.map(t => ({f:k.states.indexOf(t.f), t:k.states.indexOf(t.t)}));
   drawGraph(svg, pos, k.states, trans, nodeR,
-    i => hiStates.has(k.states[i]) ? C.red : KPAL[i % KPAL.length],
+    i => hiStates.has(k.states[i]) ? C.red : stateColor(k.states[i], i),
     i => { const name=k.states[i]; const lb=(k.labels[name]||[]).filter(l=>l!==name); return ab(name)+(lb.length?'\n{'+lb.join(',')+'}':''); },
     new Set(), k.states.indexOf(k.initial),
     ()=>C.gray, ()=>'arr', ()=>'', true);
@@ -416,7 +421,7 @@ function renderProduct(svgEl, ex, showDFS=false) {
 
   const kStates = ex.kripke.states;
   drawGraph(svg, pos, p.states, p.trans, nodeR,
-    i => { const ki=kStates.indexOf(p.states[i].k); return KPAL[ki%KPAL.length]; },
+    i => { const ks=p.states[i].k; return stateColor(ks, kStates.indexOf(ks)); },
     i => ab(p.states[i].k)+'\nq'+p.states[i].b,
     new Set(p.acc), p.init[0],
     ()=>C.gray, ()=>'arr', ()=>'', true);
