@@ -509,6 +509,120 @@ function renderProduct(svgEl, ex, showDFS=false) {
 }
 
 /* ══════════════════════════════════════════════════════════════════
+   TRACE ANIMATION
+══════════════════════════════════════════════════════════════════ */
+let _traceTimers = [];
+function clearTraceTimers() { _traceTimers.forEach(clearTimeout); _traceTimers = []; }
+
+function renderTrace(svgEl, ex, path, keyState, isVerified) {
+  clearTraceTimers();
+  const svg = d3.select(svgEl);
+  const {W,H} = getSVGSize(svgEl);
+  svg.attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove(); mkDefs(svg);
+
+  const TRACE_H = 78;
+  const graphH = H - TRACE_H;
+  const k = ex.kripke, n = k.states.length;
+  const r = Math.min(W, graphH) * (n<=3 ? .27 : .30);
+  const nodeR = Math.min(W, graphH) * .08;
+  const pos = circPos(n, W/2, graphH/2, r);
+  const trans = k.trans.map(t => ({f:k.states.indexOf(t.f), t:k.states.indexOf(t.t)}));
+
+  drawGraph(svg, pos, k.states, trans, nodeR,
+    i => stateColor(k.states[i], i),
+    i => { const nm=k.states[i]; const lb=(k.labels[nm]||[]).filter(l=>l!==nm); return ab(nm)+(lb.length?'\n{'+lb.join(',')+'}':''); },
+    new Set(), k.states.indexOf(k.initial),
+    ()=>C.gray, ()=>'arr', ()=>'', false);
+
+  // moving token ring
+  const fi = k.states.indexOf(path[0]);
+  const token = svg.append('circle')
+    .attr('cx',pos[fi].x).attr('cy',pos[fi].y).attr('r',nodeR+8)
+    .attr('fill','none').attr('stroke',C.white).attr('stroke-width',3).attr('opacity',0);
+  _traceTimers.push(setTimeout(() =>
+    token.transition().duration(300).attr('opacity',1), 150));
+
+  // trace chip row
+  const CHIP_R = 13;
+  const SPACING = Math.min(46, (W - 60) / path.length);
+  const traceY = graphH + TRACE_H/2 - 6;
+  const sx = W/2 - ((path.length-1)*SPACING)/2;
+  const traceG = svg.append('g');
+  const STEP = 720;
+
+  path.forEach((name, step) => {
+    const si = k.states.indexOf(name);
+    const isKey = name === keyState;
+    _traceTimers.push(setTimeout(() => {
+      // move token
+      token.transition().duration(Math.round(STEP*0.52)).ease(d3.easeCubicInOut)
+        .attr('cx',pos[si].x).attr('cy',pos[si].y)
+        .attr('stroke', isKey ? (isVerified?C.green:C.red) : C.white)
+        .attr('stroke-width', isKey ? 4 : 3);
+      // ripple on key state visit
+      if (isKey) {
+        [0,220].forEach(off => _traceTimers.push(setTimeout(() => {
+          svg.append('circle')
+            .attr('cx',pos[si].x).attr('cy',pos[si].y).attr('r',nodeR+8)
+            .attr('fill','none').attr('stroke',isVerified?C.green:C.red)
+            .attr('stroke-width',2).attr('opacity',0.85)
+            .transition().duration(680).attr('r',nodeR+30).attr('opacity',0).remove();
+        }, off)));
+      }
+      // chip
+      const cx2 = sx + step*SPACING;
+      const col = isKey ? (isVerified?C.green:C.red) : stateColor(name, si);
+      if (step>0) {
+        traceG.append('text').attr('x',cx2-SPACING/2).attr('y',traceY+1)
+          .attr('text-anchor','middle').attr('dominant-baseline','middle')
+          .attr('fill',C.gray).attr('font-size',9).attr('opacity',0).text('→')
+          .transition().duration(200).attr('opacity',1);
+      }
+      const cg = traceG.append('g').attr('opacity',0);
+      cg.append('circle').attr('cx',cx2).attr('cy',traceY).attr('r',CHIP_R)
+        .attr('fill',col).attr('fill-opacity',0.28).attr('stroke',col).attr('stroke-width',isKey?2:1.5);
+      cg.append('text').attr('x',cx2).attr('y',traceY).attr('text-anchor','middle')
+        .attr('dominant-baseline','middle').attr('fill',col)
+        .attr('font-size',8).attr('font-family','Courier New').attr('font-weight','bold')
+        .text(name.length>5 ? name.slice(0,5) : name);
+      cg.transition().duration(260).attr('opacity',1);
+    }, step*STEP + 250));
+  });
+
+  // finale: ∞ + conclusion + mark unreachable state
+  _traceTimers.push(setTimeout(() => {
+    const lastX = sx + (path.length-1)*SPACING;
+    traceG.append('text').attr('x',lastX+SPACING*0.78).attr('y',traceY+1)
+      .attr('dominant-baseline','middle').attr('fill',isVerified?C.green:C.red)
+      .attr('font-size',15).attr('font-weight','bold').attr('opacity',0).text('→ ∞')
+      .transition().duration(500).attr('opacity',1);
+
+    svg.append('text').attr('x',W/2).attr('y',H-9).attr('text-anchor','middle')
+      .attr('fill',isVerified?C.green:C.red).attr('font-size',12.5)
+      .attr('font-family','Courier New').attr('font-weight','bold').attr('opacity',0)
+      .text(isVerified
+        ? `"${keyState}" aparece infinitamente  →  G F ${keyState} ✅`
+        : `"${keyState}" nunca aparece  →  G F ${keyState} ❌`)
+      .transition().duration(600).attr('opacity',1);
+
+    if (!isVerified) {
+      const gi = k.states.indexOf(keyState);
+      if (gi>=0) {
+        svg.append('circle')
+          .attr('cx',pos[gi].x).attr('cy',pos[gi].y).attr('r',nodeR)
+          .attr('fill','rgba(243,139,168,0.22)').attr('stroke',C.red).attr('stroke-width',2.5)
+          .attr('opacity',0).transition().duration(400).attr('opacity',1);
+        svg.append('text')
+          .attr('x',pos[gi].x).attr('y',pos[gi].y+1).attr('text-anchor','middle')
+          .attr('dominant-baseline','middle').attr('fill',C.red)
+          .attr('font-size',nodeR*1.35).attr('font-weight','bold')
+          .attr('opacity',0).text('✕').transition().duration(400).attr('opacity',0.9);
+      }
+    }
+  }, path.length*STEP + 520));
+}
+
+/* ══════════════════════════════════════════════════════════════════
    SLIDE HTML (content only — outer div added by JS)
 ══════════════════════════════════════════════════════════════════ */
 const HTML = {
@@ -627,6 +741,34 @@ pipeline: `
     <div class="pip-res"><span style="color:var(--red);font-size:1.2rem">❌</span><span><strong style="color:var(--red)">Violado</strong> — ciclo encontrado → contraejemplo <code>(prefijo · ciclo)^ω</code></span></div>
   </div>
 </div>`,
+
+ex1trace: `
+<div class="sp-left">
+  <div class="sp-tag">Ejemplo 1 — Ejecución</div>
+  <div class="sp-h2">Observando el semáforo en tiempo real</div>
+  <div class="sp-body">
+    El cursor <span style="color:var(--white);font-size:1.1em">◯</span> recorre los estados mientras el sistema avanza.<br><br>
+    Cada vez que llega a <strong style="color:var(--green)">verde</strong>, el estado destella — evidencia de que la propiedad se satisface en esa vuelta.<br><br>
+    El ciclo se repite infinitamente:<br>
+    <code>rojo → verde → amarillo → rojo → ···</code>
+  </div>
+  <div class="sp-note" style="color:var(--green)">"verde" aparece cada 3 pasos → G F verde ✅</div>
+</div>
+<div class="sp-right"><svg id="svg-t1"></svg></div>`,
+
+ex2trace: `
+<div class="sp-left">
+  <div class="sp-tag">Ejemplo 2 — Ejecución con Bug</div>
+  <div class="sp-h2">El sistema atrapado<br>en un ciclo</div>
+  <div class="sp-body">
+    Arranca normalmente: <code>idle → request</code>.<br><br>
+    Pero <code>request</code> lleva a <strong style="color:var(--red)">deny</strong> — y entra en el loop:<br>
+    <code style="color:var(--red)">deny → request → deny → ···</code><br><br>
+    El estado <code>grant</code> nunca se visita. Aparece tachado al final — ausente de toda esta traza.
+  </div>
+  <div class="sp-note" style="color:var(--red)">"grant" nunca aparece → G F grant ❌</div>
+</div>
+<div class="sp-right"><svg id="svg-t2"></svg></div>`,
 
 ex1kripke: `
 <div class="sp-left">
@@ -787,6 +929,11 @@ const SLIDES = [
 
   { label:'Ej1: Sistema',   type:'s-split',    html: HTML.ex1kripke,
     onEnter: el => renderKripke(el.querySelector('#svg-k1'), EX[0]) },
+  { label:'Ej1: Ejecución', type:'s-split',    html: HTML.ex1trace,
+    alwaysRender: true,
+    onEnter: el => renderTrace(el.querySelector('#svg-t1'), EX[0],
+      ['rojo','verde','amarillo','rojo','verde','amarillo','rojo','verde','amarillo','rojo','verde'],
+      'verde', true) },
   { label:'Ej1: Büchi',     type:'s-split',    html: HTML.ex1buchi,
     onEnter: el => renderBuchi(el.querySelector('#svg-b1'), EX[0]) },
   { label:'Ej1: Producto',  type:'s-split',    html: HTML.ex1product,
@@ -795,6 +942,11 @@ const SLIDES = [
 
   { label:'Ej2: Sistema',   type:'s-split',    html: HTML.ex2kripke,
     onEnter: el => renderKripke(el.querySelector('#svg-k2'), EX[1]) },
+  { label:'Ej2: Ejecución', type:'s-split',    html: HTML.ex2trace,
+    alwaysRender: true,
+    onEnter: el => renderTrace(el.querySelector('#svg-t2'), EX[1],
+      ['idle','request','deny','request','deny','request','deny','request','deny'],
+      'grant', false) },
   { label:'Ej2: Nested DFS',type:'s-split',    html: HTML.ex2dfs,
     alwaysRender: true,
     onEnter: el => renderProduct(el.querySelector('#svg-p2'), EX[1], true) },
