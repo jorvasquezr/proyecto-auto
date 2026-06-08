@@ -143,21 +143,21 @@ footer {
   border-bottom: 1px solid var(--border);
 }
 .sv-tag { font-size:.62rem; text-transform:uppercase; letter-spacing:.12em; color:var(--blue); font-weight:600; flex-shrink:0; }
-.sv-title { font-size:.95rem; font-weight:700; color:var(--white); }
+.sv-title { font-size:1.1rem; font-weight:700; color:var(--white); }
 .sv-body { flex:1; min-height:0; display:flex; }
 .sv-list {
-  width:252px; flex-shrink:0; border-right:1px solid var(--border);
-  background:var(--panel); overflow-y:auto; padding:8px 0;
-  display:flex; flex-direction:column; gap:1px;
+  flex: 0 0 40%; border-right:1px solid var(--border);
+  background:var(--panel); overflow-y:auto; padding:12px 0;
+  display:flex; flex-direction:column; gap:2px;
 }
 .sv-step {
-  padding:8px 13px; display:flex; align-items:flex-start; gap:9px;
-  font-size:.75rem; color:var(--sub); line-height:1.5; cursor:default;
+  padding:13px 22px; display:flex; align-items:flex-start; gap:14px;
+  font-size:1rem; color:var(--sub); line-height:1.55; cursor:default;
   transition: background .1s;
 }
-.sv-step.done { color:rgba(205,214,244,.55); }
+.sv-step.done { color:rgba(205,214,244,.5); }
 .sv-step.active { background:rgba(137,180,250,.1); color:var(--white); font-weight:600; }
-.sv-icon { font-size:.68rem; width:13px; text-align:center; flex-shrink:0; margin-top:2px; }
+.sv-icon { font-size:.85rem; width:16px; text-align:center; flex-shrink:0; margin-top:3px; }
 .sv-svg { flex:1; min-height:0; display:flex; padding:5px 11px 4px; }
 .sv-svg svg { width:100%; height:100%; }
 .sv-nav {
