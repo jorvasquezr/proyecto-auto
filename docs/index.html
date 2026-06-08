@@ -135,18 +135,43 @@ footer {
 .pip-res { display: flex; align-items: center; gap: 10px; font-size: .85rem; color: var(--sub); }
 .pip-res code { font-family: monospace; color: var(--orange); font-size: .82rem; }
 
-/* ── Verify (full-SVG with header bar) ──────────────────────────── */
+/* ── Verify (step list + SVG + inner nav) ──────────────────────── */
 .s-verify { flex-direction: column; background: var(--bg); }
 .sv-header {
-  flex-shrink: 0; padding: 14px 36px 10px;
-  display: flex; align-items: center; gap: 20px;
+  flex-shrink: 0; padding: 11px 26px 9px;
+  display: flex; align-items: center; gap: 16px;
   border-bottom: 1px solid var(--border);
 }
 .sv-tag { font-size:.62rem; text-transform:uppercase; letter-spacing:.12em; color:var(--blue); font-weight:600; flex-shrink:0; }
-.sv-title { font-size:1rem; font-weight:700; color:var(--white); flex-shrink:0; }
-.sv-desc { font-size:.78rem; color:var(--sub); flex:1; line-height:1.5; }
-.sv-svg { flex:1; min-height:0; display:flex; padding:6px 14px 10px; }
+.sv-title { font-size:.95rem; font-weight:700; color:var(--white); }
+.sv-body { flex:1; min-height:0; display:flex; }
+.sv-list {
+  width:252px; flex-shrink:0; border-right:1px solid var(--border);
+  background:var(--panel); overflow-y:auto; padding:8px 0;
+  display:flex; flex-direction:column; gap:1px;
+}
+.sv-step {
+  padding:8px 13px; display:flex; align-items:flex-start; gap:9px;
+  font-size:.75rem; color:var(--sub); line-height:1.5; cursor:default;
+  transition: background .1s;
+}
+.sv-step.done { color:rgba(205,214,244,.55); }
+.sv-step.active { background:rgba(137,180,250,.1); color:var(--white); font-weight:600; }
+.sv-icon { font-size:.68rem; width:13px; text-align:center; flex-shrink:0; margin-top:2px; }
+.sv-svg { flex:1; min-height:0; display:flex; padding:5px 11px 4px; }
 .sv-svg svg { width:100%; height:100%; }
+.sv-nav {
+  flex-shrink:0; background:var(--panel); border-top:1px solid var(--border);
+  padding:6px 20px; display:flex; align-items:center; gap:10px;
+}
+.sv-btn {
+  padding:4px 14px; border-radius:6px; border:1px solid var(--border);
+  background:transparent; color:var(--white); cursor:pointer; font-size:.78rem;
+  transition: all .13s;
+}
+.sv-btn:hover:not(:disabled) { border-color:var(--blue); color:var(--blue); }
+.sv-btn:disabled { opacity:.28; cursor:default; }
+.sv-step-count { flex:1; text-align:center; font-size:.72rem; color:var(--gray); font-family:monospace; }
 
 /* ── Split slides ───────────────────────────────────────────────── */
 .s-split { flex-direction: row; background: var(--bg); }
@@ -638,135 +663,166 @@ function renderTrace(svgEl, ex, path, keyState, isVerified) {
 /* ══════════════════════════════════════════════════════════════════
    PRODUCT VERIFY ANIMATION
 ══════════════════════════════════════════════════════════════════ */
-function renderProductVerify(svgEl, ex) {
-  clearTraceTimers();
-  const svg = d3.select(svgEl);
-  const {W,H} = getSVGSize(svgEl);
+/* ── Step data per example ───────────────────────────────────── */
+function buildPVSteps(ex) {
+  if (ex.result) {
+    // Semaphore: 0=(rojo,q0) 1=(verde,q1)✓ 2=(verde,q0) 3=(amarillo,q0) 4=(rojo,q1)✓
+    return [
+      { label:'M×A construido — 5 estados, 6 transiciones', newT:[], tok:-1 },
+      { label:'DFS exterior: inicio en (rojo, q0)', newT:[], tok:0, tc:C.white },
+      { label:'DFS exterior → (verde, q1)  ⭐ estado aceptante', newT:[{f:0,t:1,c:C.blue,m:'arr-b'}], tok:1, tc:C.yellow, pulse:true },
+      { label:'DFS interior: sin sucesores → sin ciclo aquí  ✗', newT:[], tok:1, tc:C.green, note:{si:1,t:'✗ sin sucesores',c:C.green} },
+      { label:'DFS exterior: retroceder → (verde, q0)', newT:[{f:0,t:2,c:C.blue,m:'arr-b'}], tok:2, tc:C.white },
+      { label:'DFS exterior → (amarillo, q0)', newT:[{f:2,t:3,c:C.blue,m:'arr-b'}], tok:3, tc:C.white },
+      { label:'DFS exterior → (rojo, q1)  ⭐ estado aceptante', newT:[{f:3,t:4,c:C.blue,m:'arr-b'}], tok:4, tc:C.yellow, pulse:true },
+      { label:'DFS interior: (rojo,q1)→(verde,q1) ya visitado → sin ciclo  ✗', newT:[{f:4,t:1,c:C.blue,m:'arr-b'}], tok:1, tc:C.sub, note:{si:1,t:'✗ ya visitado',c:C.sub} },
+      { label:'DFS completo — ningún ciclo aceptante  ✅', newT:[], tok:-1, concl:{t:'Ningún ciclo aceptante encontrado   M ⊨ G F verde ✅',c:C.green} },
+    ];
+  } else {
+    // Protocol bug: 0=(idle,q0) 1=(request,q1)✓ 4=(deny,q1)✓
+    return [
+      { label:'M×A construido — 7 estados, 12 transiciones', newT:[], tok:-1 },
+      { label:'DFS exterior: inicio en (idle, q0)', newT:[], tok:0, tc:C.white },
+      { label:'DFS exterior → (request, q1)  ⭐ estado aceptante', newT:[{f:0,t:1,c:C.orange,m:'arr-o'}], tok:1, tc:C.yellow, pulse:true },
+      { label:'DFS interior lanzado desde (request, q1)', newT:[], tok:1, tc:C.yellow, note:{si:1,t:'DFS interior ▶',c:C.orange} },
+      { label:'DFS interior → (deny, q1)  ⭐ estado aceptante', newT:[{f:1,t:4,c:C.orange,m:'arr-o'}], tok:4, tc:C.yellow, pulse:true },
+      { label:'DFS interior → (request, q1)  🔴 ¡CICLO ENCONTRADO!', newT:[{f:4,t:1,c:C.red,m:'arr-r'}], tok:1, tc:C.red, pulse:true, pc:C.red },
+      { label:'Contraejemplo: (request→deny)^ω   φ RECHAZADA  ❌', newT:[], tok:-1, rcol:[{si:1,c:C.red},{si:4,c:C.red}], concl:{t:'Ciclo aceptante hallado — G F grant RECHAZADA ❌',c:C.red} },
+    ];
+  }
+}
+
+const _pv = {};
+
+function pvDraw(name, animate) {
+  const s = _pv[name]; if (!s) return;
+  const svg = d3.select(s.svgEl);
+  const {W,H} = getSVGSize(s.svgEl);
   svg.attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove(); mkDefs(svg);
 
-  const p = ex.product, n = p.states.length;
-  const nodeR = n <= 5 ? 32 : 27;
+  const p = s.ex.product, pos = s.pos, nodeR = s.nodeR;
+  const kStates = s.ex.kripke.states;
+  const step = s.steps[s.cur];
 
-  if (!_prodPos[ex.name]) {
-    _prodPos[ex.name] = n<=5
-      ? circPos(n, W/2, H/2, Math.min(W,H)*.34)
-      : forcePos(p.states, p.trans, W/2, H/2-10);
-  }
-  const pos = _prodPos[ex.name];
-  const kStates = ex.kripke.states;
-
+  // base graph (instant, no animation)
   drawGraph(svg, pos, p.states, p.trans, nodeR,
     i => { const ks=p.states[i].k; return stateColor(ks, kStates.indexOf(ks)); },
     i => ab(p.states[i].k)+'\nq'+p.states[i].b,
     new Set(p.acc), p.init[0],
-    () => C.gray, () => 'arr', () => '', true);
+    () => C.gray, () => 'arr', () => '', false);
 
-  svg.append('text').attr('x',12).attr('y',H-10).attr('fill',C.sub).attr('font-size',10.5)
-    .attr('opacity',0).text(`M×A: ${n} estados · ${p.acc.length} aceptantes (⊙)`)
-    .transition().delay(900).duration(400).attr('opacity',1);
-
-  const gDelay = p.trans.length*20 + p.states.length*50 + 700;
-  const STEP = 950;
+  // accumulated trails: old ones dimmed, new ones bright + animated
+  const allT = [];
+  for (let i=0; i<=s.cur; i++)
+    (s.steps[i].newT||[]).forEach(t => allT.push({...t, isNew: i===s.cur && animate}));
+  allT.forEach(tr => {
+    const path = svg.append('path')
+      .attr('d', epath(pos[tr.f].x,pos[tr.f].y,pos[tr.t].x,pos[tr.t].y,0,nodeR+5,tr.f===tr.t))
+      .attr('fill','none').attr('stroke',tr.c)
+      .attr('stroke-width', tr.isNew ? 4.5 : 3.5)
+      .attr('marker-end',`url(#${tr.m})`)
+      .attr('opacity', tr.isNew ? 0.95 : 0.55);
+    if (tr.isNew) animP(path, 0, 500);
+  });
 
   // token ring
-  const tok = svg.append('circle').attr('r',nodeR+9).attr('fill','none')
-    .attr('stroke',C.white).attr('stroke-width',3).attr('opacity',0);
-  _traceTimers.push(setTimeout(() =>
-    tok.attr('cx',pos[p.init[0]].x).attr('cy',pos[p.init[0]].y)
-       .transition().duration(400).attr('opacity',1), gDelay-250));
+  if (step.tok >= 0) {
+    const {x,y} = pos[step.tok];
+    const tok = svg.append('circle').attr('cx',x).attr('cy',y).attr('r',nodeR+9)
+      .attr('fill','none').attr('stroke',step.tc||C.white).attr('stroke-width',3.5)
+      .attr('opacity', animate ? 0 : 1);
+    if (animate) tok.transition().duration(320).attr('opacity',1);
 
-  const tokTo = (si, col, d) => _traceTimers.push(setTimeout(() =>
-    tok.transition().duration(Math.round(STEP*.52)).ease(d3.easeCubicInOut)
-      .attr('cx',pos[si].x).attr('cy',pos[si].y)
-      .attr('stroke',col||C.white).attr('stroke-width',col===C.yellow?3:col?4:3), d));
+    if (animate && step.pulse) {
+      const pc = step.pc || C.yellow;
+      [0,260].forEach(off => setTimeout(() =>
+        svg.append('circle').attr('cx',x).attr('cy',y).attr('r',nodeR+9)
+          .attr('fill','none').attr('stroke',pc).attr('stroke-width',2.5).attr('opacity',.85)
+          .transition().duration(700).attr('r',nodeR+32).attr('opacity',0).remove(), off));
+    }
+  }
 
-  const ripple = (si, col, d) => _traceTimers.push(setTimeout(() =>
-    [0,260].forEach(off => setTimeout(() =>
-      svg.append('circle').attr('cx',pos[si].x).attr('cy',pos[si].y).attr('r',nodeR+9)
-        .attr('fill','none').attr('stroke',col).attr('stroke-width',2.5).attr('opacity',.85)
-        .transition().duration(720).attr('r',nodeR+32).attr('opacity',0).remove(), off)), d));
-
-  const trail = (fi, ti, col, mk, d) => _traceTimers.push(setTimeout(() => {
-    const path = svg.append('path')
-      .attr('d', epath(pos[fi].x,pos[fi].y,pos[ti].x,pos[ti].y,0,nodeR+5,fi===ti))
-      .attr('fill','none').attr('stroke',col).attr('stroke-width',4.5)
-      .attr('marker-end',`url(#${mk})`).attr('opacity',.9);
-    animP(path, 0, 520);
-  }, d));
-
-  const floatLbl = (si, txt, col, d) => _traceTimers.push(setTimeout(() => {
-    const el = svg.append('text')
-      .attr('x',pos[si].x).attr('y',pos[si].y-nodeR-14)
-      .attr('text-anchor','middle').attr('fill',col)
-      .attr('font-size',10.5).attr('font-family','Courier New').attr('opacity',0).text(txt)
-      .transition().duration(300).attr('opacity',1);
-    setTimeout(() => el.transition().duration(400).attr('opacity',0).remove(), 1500);
-  }, d));
-
-  const conclude = (txt, col, d) => _traceTimers.push(setTimeout(() =>
-    svg.append('text').attr('x',W/2).attr('y',H-10).attr('text-anchor','middle')
-      .attr('fill',col).attr('font-size',13).attr('font-family','Courier New')
-      .attr('font-weight','bold').attr('opacity',0).text(txt)
-      .transition().duration(700).attr('opacity',1), d));
-
-  const recolor = (si, col, d) => _traceTimers.push(setTimeout(() => {
-    svg.append('circle').attr('cx',pos[si].x).attr('cy',pos[si].y).attr('r',nodeR)
-      .attr('fill',col).attr('stroke','#13131e').attr('stroke-width',2.5).attr('opacity',0)
+  // note badge above state
+  if (step.note) {
+    const {x,y} = pos[step.note.si];
+    svg.append('text').attr('x',x).attr('y',y-nodeR-13)
+      .attr('text-anchor','middle').attr('fill',step.note.c)
+      .attr('font-size',10.5).attr('font-family','Courier New')
+      .attr('opacity', animate?0:1).text(step.note.t)
       .transition().duration(380).attr('opacity',1);
-    const s = ab(p.states[si].k)+'\nq'+p.states[si].b, ls = s.split('\n');
+  }
+
+  // recolor nodes
+  if (step.rcol) step.rcol.forEach(({si,c}) => {
+    svg.append('circle').attr('cx',pos[si].x).attr('cy',pos[si].y).attr('r',nodeR)
+      .attr('fill',c).attr('stroke','#13131e').attr('stroke-width',2.5)
+      .attr('opacity',animate?0:1).transition().duration(360).attr('opacity',1);
+    const lbl=ab(p.states[si].k)+'\nq'+p.states[si].b, ls=lbl.split('\n');
     ls.forEach((ln,li) => svg.append('text')
       .attr('x',pos[si].x).attr('y',pos[si].y+(li-(ls.length-1)/2)*13+1)
       .attr('text-anchor','middle').attr('dominant-baseline','middle')
-      .attr('fill','#13131e').attr('font-size',9).attr('font-family','Courier New')
-      .attr('font-weight','bold').text(ln)
-      .attr('opacity',0).transition().delay(200).duration(200).attr('opacity',1));
-  }, d));
+      .attr('fill','#13131e').attr('font-size',9).attr('font-family','Courier New').attr('font-weight','bold')
+      .text(ln).attr('opacity',animate?0:1).transition().delay(180).duration(200).attr('opacity',1));
+  });
 
-  if (ex.result) {
-    /* ── VERIFIED: Semaphore ─────────────────────────────────────
-       States: 0(rojo,q0)  1(verde,q1)✓  2(verde,q0)  3(amarillo,q0)  4(rojo,q1)✓
-       Edges:  0→1  0→2  2→3  3→4  3→0  4→1
-       Story:  DFS visits 1(acc)→dead end → 4(acc)→leads to 1(visited) → no cycle */
-    let d = gDelay;
-    tokTo(0, null, d); floatLbl(0, 'DFS exterior', C.blue, d+200); d+=STEP;
+  // conclusion
+  if (step.concl)
+    svg.append('text').attr('x',W/2).attr('y',H-11).attr('text-anchor','middle')
+      .attr('fill',step.concl.c).attr('font-size',13).attr('font-family','Courier New')
+      .attr('font-weight','bold').attr('opacity',animate?0:1).text(step.concl.t)
+      .transition().duration(600).attr('opacity',1);
 
-    trail(0,1,C.blue,'arr-b',d-260); tokTo(1,C.yellow,d);
-    floatLbl(1,'⭐ aceptante — DFS interior',C.yellow,d+200); ripple(1,C.yellow,d+350); d+=STEP;
-    floatLbl(1,'✗ sin sucesores — sin ciclo',C.green,d); d+=STEP*.75;
+  // static info
+  svg.append('text').attr('x',11).attr('y',H-11).attr('fill',C.sub).attr('font-size',10)
+    .text(`M×A: ${p.states.length} estados · ${p.acc.length} aceptantes (⊙)`);
+}
 
-    trail(0,2,C.blue,'arr-b',d-220); tokTo(2,null,d); d+=STEP;
-    trail(2,3,C.blue,'arr-b',d-220); tokTo(3,null,d); d+=STEP;
+function pvUpdateUI(name) {
+  const s = _pv[name]; if (!s) return;
+  // step list
+  s.stepsEl.innerHTML = '';
+  s.steps.forEach((step, i) => {
+    const div = document.createElement('div');
+    const cls = i < s.cur ? 'done' : i === s.cur ? 'active' : '';
+    div.className = 'sv-step' + (cls ? ' '+cls : '');
+    const icon = i < s.cur ? '✓' : i === s.cur ? '→' : '○';
+    div.innerHTML = `<span class="sv-icon">${icon}</span><span>${step.label}</span>`;
+    s.stepsEl.appendChild(div);
+  });
+  s.stepsEl.querySelector('.active')?.scrollIntoView({block:'nearest'});
+  // counter + buttons
+  s.counterEl.textContent = `${s.cur+1} / ${s.steps.length}`;
+  s.prevEl.disabled = s.cur === 0;
+  s.nextEl.disabled = s.cur === s.steps.length-1;
+}
 
-    trail(3,4,C.blue,'arr-b',d-220); tokTo(4,C.yellow,d);
-    floatLbl(4,'⭐ aceptante — DFS interior',C.yellow,d+200); ripple(4,C.yellow,d+350); d+=STEP;
+function pvStep(name, dir) {
+  const s = _pv[name]; if (!s) return;
+  const next = s.cur + dir;
+  if (next < 0 || next >= s.steps.length) return;
+  s.cur = next;
+  pvDraw(name, dir > 0);
+  pvUpdateUI(name);
+}
 
-    trail(4,1,C.blue,'arr-b',d-220);
-    floatLbl(1,'✗ ya visitado — no hay nuevo ciclo',C.sub,d); d+=STEP*.75;
+function renderProductVerify(svgEl, stepsEl, prevEl, nextEl, counterEl, ex) {
+  const name = ex.name;
+  const {W,H} = getSVGSize(svgEl);
+  const p = ex.product, n = p.states.length;
+  const nodeR = n <= 5 ? 32 : 27;
+  // recompute layout fresh each entry (slide may have resized)
+  delete _prodPos[name];
+  _prodPos[name] = n<=5
+    ? circPos(n, W/2, H/2, Math.min(W,H)*.34)
+    : forcePos(p.states, p.trans, W/2, H/2-10);
 
-    _traceTimers.push(setTimeout(()=>tok.transition().duration(500).attr('opacity',0),d));
-    conclude('DFS completo — ningún ciclo aceptante   M ⊨ φ ✅', C.green, d+350);
-
-  } else {
-    /* ── REJECTED: Protocol bug ──────────────────────────────────
-       CE prefix: 0→1→4   CE cycle: 4→1→4
-       Story:  outer DFS 0→1(acc) → inner DFS 1→4→1 CYCLE! */
-    let d = gDelay;
-    tokTo(0, null, d); floatLbl(0,'DFS exterior',C.orange,d+200); d+=STEP;
-
-    trail(0,1,C.orange,'arr-o',d-260); tokTo(1,C.yellow,d);
-    floatLbl(1,'⭐ aceptante — inicia DFS interior',C.yellow,d+200); ripple(1,C.yellow,d+360); d+=STEP;
-
-    trail(1,4,C.orange,'arr-o',d-260); tokTo(4,C.yellow,d);
-    floatLbl(4,'⭐ aceptante',C.yellow,d+200); ripple(4,C.yellow,d+360); d+=STEP;
-
-    trail(4,1,C.red,'arr-r',d-260); tokTo(1,C.red,d);
-    floatLbl(1,'🔴 ¡CICLO ENCONTRADO!',C.red,d+150);
-    ripple(1,C.red,d+300); ripple(1,C.red,d+560); d+=STEP;
-
-    recolor(1,C.red,d); recolor(4,C.red,d+220);
-    _traceTimers.push(setTimeout(()=>tok.transition().duration(500).attr('opacity',0),d+100));
-    conclude('Ciclo aceptante: (request→deny)^ω   φ RECHAZADA ❌', C.red, d+550);
-  }
+  _pv[name] = { svgEl, stepsEl, prevEl, nextEl, counterEl,
+                steps: buildPVSteps(ex), cur: 0, ex,
+                pos: _prodPos[name], nodeR };
+  prevEl.onclick = () => pvStep(name, -1);
+  nextEl.onclick = () => pvStep(name,  1);
+  pvDraw(name, false);
+  pvUpdateUI(name);
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -949,10 +1005,17 @@ ex1buchi: `
 ex1product: `
 <div class="sv-header">
   <span class="sv-tag">Ejemplo 1 — Producto M×A</span>
-  <span class="sv-title">Nested DFS en acción</span>
-  <span class="sv-desc">DFS exterior explora todos los estados &nbsp;·&nbsp; al llegar a un estado ⭐ aceptante lanza DFS interior buscando volver a él &nbsp;·&nbsp; si no puede: sin ciclo → <strong style="color:var(--green)">verificado</strong></span>
+  <span class="sv-title">Nested DFS — Semáforo</span>
 </div>
-<div class="sv-svg"><svg id="svg-p1"></svg></div>`,
+<div class="sv-body">
+  <div class="sv-list" id="pv0-list"></div>
+  <div class="sv-svg"><svg id="svg-p1"></svg></div>
+</div>
+<div class="sv-nav">
+  <button class="sv-btn" id="pv0-prev">← Anterior</button>
+  <span class="sv-step-count" id="pv0-count"></span>
+  <button class="sv-btn" id="pv0-next">Siguiente →</button>
+</div>`,
 
 ex1result: `
 <div class="rb-big ok">
@@ -984,10 +1047,17 @@ ex2kripke: `
 ex2dfs: `
 <div class="sv-header">
   <span class="sv-tag">Ejemplo 2 — Producto M×A</span>
-  <span class="sv-title">Nested DFS encuentra el ciclo</span>
-  <span class="sv-desc">DFS exterior <span style="color:var(--orange)">━━</span> llega a estado aceptante ⭐ &nbsp;·&nbsp; DFS interior <span style="color:var(--red)">━━</span> detecta el ciclo &nbsp;·&nbsp; ciclo hallado → <strong style="color:var(--red)">rechazado</strong></span>
+  <span class="sv-title">Nested DFS — Protocolo con Bug</span>
 </div>
-<div class="sv-svg"><svg id="svg-p2"></svg></div>`,
+<div class="sv-body">
+  <div class="sv-list" id="pv1-list"></div>
+  <div class="sv-svg"><svg id="svg-p2"></svg></div>
+</div>
+<div class="sv-nav">
+  <button class="sv-btn" id="pv1-prev">← Anterior</button>
+  <span class="sv-step-count" id="pv1-count"></span>
+  <button class="sv-btn" id="pv1-next">Siguiente →</button>
+</div>`,
 
 ex2result: `
 <div class="rb-big fail">
@@ -1073,8 +1143,11 @@ const SLIDES = [
   { label:'Ej1: Büchi',     type:'s-split',    html: HTML.ex1buchi,
     onEnter: el => renderBuchi(el.querySelector('#svg-b1'), EX[0]) },
   { label:'Ej1: Producto',  type:'s-verify',   html: HTML.ex1product,
-    alwaysRender: true,
-    onEnter: el => renderProductVerify(el.querySelector('#svg-p1'), EX[0]) },
+    pvName: 'Semáforo', alwaysRender: true,
+    onEnter: el => renderProductVerify(
+      el.querySelector('#svg-p1'), el.querySelector('#pv0-list'),
+      el.querySelector('#pv0-prev'), el.querySelector('#pv0-next'),
+      el.querySelector('#pv0-count'), EX[0]) },
   { label:'✅ Verificado',   type:'s-result',   html: HTML.ex1result },
 
   { label:'Ej2: Sistema',   type:'s-split',    html: HTML.ex2kripke,
@@ -1085,8 +1158,11 @@ const SLIDES = [
       ['idle','request','deny','request','deny','request','deny','request','deny'],
       'grant', false) },
   { label:'Ej2: Nested DFS',type:'s-verify',   html: HTML.ex2dfs,
-    alwaysRender: true,
-    onEnter: el => renderProductVerify(el.querySelector('#svg-p2'), EX[1]) },
+    pvName: 'Protocolo con Bug', alwaysRender: true,
+    onEnter: el => renderProductVerify(
+      el.querySelector('#svg-p2'), el.querySelector('#pv1-list'),
+      el.querySelector('#pv1-prev'), el.querySelector('#pv1-next'),
+      el.querySelector('#pv1-count'), EX[1]) },
   { label:'❌ Rechazado',    type:'s-result',   html: HTML.ex2result },
   { label:'Conclusiones',    type:'s-concept',  html: HTML.conclusiones },
 ];
@@ -1131,8 +1207,18 @@ function updateNav() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur+1); }
-  if (e.key === 'ArrowLeft')  { e.preventDefault(); go(cur-1); }
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    const pn = SLIDES[cur].pvName;
+    if (pn) { const pv=_pv[pn]; if(pv && pv.cur < pv.steps.length-1) { pvStep(pn,1); return; } }
+    go(cur+1);
+  }
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    const pn = SLIDES[cur].pvName;
+    if (pn) { const pv=_pv[pn]; if(pv && pv.cur > 0) { pvStep(pn,-1); return; } }
+    go(cur-1);
+  }
 });
 
 go(0);
