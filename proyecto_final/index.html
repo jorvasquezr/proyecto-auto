@@ -13,41 +13,66 @@
   --orange: #fab387; --gray: #585b70; --white: #cdd6f4; --sub: #a6adc8; --purple: #cba6f7;
 }
 body { background: var(--bg); color: var(--white); font-family: 'Segoe UI', system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-header { background: var(--panel); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
-header h1 { font-size: 1.1rem; font-weight: 600; color: var(--white); letter-spacing: .03em; }
-header .sub { font-size: .8rem; color: var(--sub); }
+header { background: var(--panel); border-bottom: 1px solid var(--border); padding: 10px 24px; display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+header h1 { font-size: 1.05rem; font-weight: 600; color: var(--white); letter-spacing: .03em; }
+header .sub { font-size: .75rem; color: var(--sub); }
 .example-tabs { display: flex; gap: 6px; margin-left: auto; }
-.example-tab { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--sub); cursor: pointer; font-size: .85rem; transition: all .2s; }
+.example-tab { padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--sub); cursor: pointer; font-size: .82rem; transition: all .2s; }
 .example-tab.active { background: var(--blue); color: var(--bg); border-color: var(--blue); font-weight: 600; }
 .example-tab:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
 #main { flex: 1; display: grid; grid-template-columns: 300px 1fr; overflow: hidden; }
-#sidebar { background: var(--panel); border-right: 1px solid var(--border); padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+#sidebar { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.sidebar-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.stab { flex: 1; padding: 10px 0; background: transparent; border: none; color: var(--sub); cursor: pointer; font-size: .82rem; font-weight: 500; border-bottom: 2px solid transparent; transition: all .15s; }
+.stab.active { color: var(--blue); border-bottom-color: var(--blue); background: rgba(137,180,250,.05); }
+.stab:hover:not(.active) { color: var(--white); background: rgba(255,255,255,.03); }
+.tab-pane { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.tab-pane.hidden { display: none; }
 .info-block { background: var(--bg); border-radius: 8px; padding: 12px 14px; }
-.info-block .label { font-size: .7rem; color: var(--sub); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+.info-block .label { font-size: .68rem; color: var(--sub); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
 .formula { font-family: 'Courier New', monospace; font-size: 1rem; color: var(--yellow); }
-.neg-formula { font-family: 'Courier New', monospace; font-size: .9rem; color: var(--orange); }
-.stage-title { font-size: 1rem; font-weight: 600; color: var(--white); line-height: 1.3; }
-.stage-desc { font-size: .82rem; color: var(--sub); line-height: 1.5; margin-top: 8px; }
-.result-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: .9rem; }
+.neg-formula { font-family: 'Courier New', monospace; font-size: .88rem; color: var(--orange); }
+.stage-title { font-size: .95rem; font-weight: 600; color: var(--white); line-height: 1.3; }
+.stage-desc { font-size: .8rem; color: var(--sub); line-height: 1.55; margin-top: 8px; }
+.result-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: .88rem; }
 .result-badge.ok { background: #1d3a2a; color: var(--green); }
 .result-badge.fail { background: #3a1d28; color: var(--red); }
-.ce-path { font-family: 'Courier New', monospace; font-size: .75rem; color: var(--sub); line-height: 1.6; }
+.ce-path { font-family: 'Courier New', monospace; font-size: .72rem; color: var(--sub); line-height: 1.7; }
 .ce-path .pref { color: var(--orange); }
 .ce-path .cyc { color: var(--red); }
-.spacer { flex: 1; }
-#viz { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; position: relative; }
+.spacer { flex: 1; min-height: 8px; }
+.algo-header { background: linear-gradient(135deg, rgba(137,180,250,.12), rgba(203,166,247,.08)); border: 1px solid rgba(137,180,250,.2); border-radius: 10px; padding: 14px; }
+.algo-header .atitle { font-size: .95rem; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+.algo-header .aformula { font-family: 'Courier New', monospace; font-size: .78rem; color: var(--yellow); margin-top: 8px; padding: 6px 10px; background: rgba(0,0,0,.35); border-radius: 6px; letter-spacing: .03em; }
+.algo-section-title { font-size: .65rem; text-transform: uppercase; letter-spacing: .1em; color: var(--gray); padding-left: 2px; }
+.algo-step { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; border-left: 3px solid var(--border); background: var(--bg); transition: border-color .3s, box-shadow .3s; }
+.algo-step.current { border-left-color: var(--blue) !important; box-shadow: 0 0 0 1px rgba(137,180,250,.25); }
+.algo-step.c1 { border-left-color: #5a7abf; }
+.algo-step.c2 { border-left-color: #c07d4a; }
+.algo-step.c3 { border-left-color: #8e6cbf; }
+.algo-step.c4 { border-left-color: #b09a50; }
+.algo-step.c5 { border-left-color: #b06a3a; }
+.algo-step.c6 { border-left-color: #b0406a; }
+.algo-step.c7 { border-left-color: #4aaf6a; }
+.step-num { font-size: .68rem; font-weight: 700; color: var(--gray); flex-shrink: 0; margin-top: 2px; }
+.step-body .step-name { font-size: .82rem; font-weight: 600; color: var(--white); }
+.step-body .step-detail { font-size: .72rem; color: var(--sub); margin-top: 4px; line-height: 1.55; }
+.step-body code { font-family: 'Courier New', monospace; font-size: .7rem; color: var(--yellow); background: rgba(249,226,175,.1); padding: 1px 4px; border-radius: 3px; }
+.complexity-tag { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: .65rem; font-family: 'Courier New', monospace; font-weight: 700; background: rgba(166,227,161,.1); color: var(--green); border: 1px solid rgba(166,227,161,.25); }
+#viz { display: flex; align-items: center; justify-content: center; padding: 12px; background: var(--bg); }
 #graph-svg { width: 100%; height: 100%; }
-footer { background: var(--panel); border-top: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
-.progress-dots { display: flex; gap: 6px; }
+footer { background: var(--panel); border-top: 1px solid var(--border); padding: 10px 24px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.progress-dots { display: flex; gap: 7px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: all .3s; cursor: pointer; }
-.dot.active { background: var(--blue); transform: scale(1.3); }
+.dot.active { background: var(--blue); transform: scale(1.35); box-shadow: 0 0 8px rgba(137,180,250,.5); }
 .dot.visited { background: var(--gray); }
-.ctrl-btn { padding: 8px 20px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--white); cursor: pointer; font-size: .9rem; transition: all .15s; }
-.ctrl-btn:hover { border-color: var(--blue); color: var(--blue); }
+.ctrl-btn { padding: 7px 18px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--white); cursor: pointer; font-size: .88rem; transition: all .15s; }
+.ctrl-btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+.ctrl-btn:disabled { opacity: .35; cursor: default; }
 .ctrl-btn.primary { background: var(--blue); color: var(--bg); border-color: var(--blue); font-weight: 600; }
 .ctrl-btn.playing { background: var(--orange); color: var(--bg); border-color: var(--orange); }
-.speed-wrap { display: flex; align-items: center; gap: 8px; margin-left: auto; color: var(--sub); font-size: .8rem; }
-input[type=range] { accent-color: var(--blue); width: 90px; }
+.speed-wrap { display: flex; align-items: center; gap: 8px; margin-left: auto; color: var(--sub); font-size: .78rem; }
+input[type=range] { accent-color: var(--blue); width: 80px; }
 </style>
 </head>
 <body>
@@ -60,27 +85,92 @@ input[type=range] { accent-color: var(--blue); width: 90px; }
 </header>
 <div id="main">
   <aside id="sidebar">
-    <div class="info-block">
-      <div class="label">Propiedad φ</div>
-      <div class="formula" id="phi-display"></div>
+    <div class="sidebar-tabs">
+      <button class="stab active" id="tab-paso-btn" onclick="switchTab('paso')">Paso actual</button>
+      <button class="stab" id="tab-algo-btn" onclick="switchTab('algo')">Algoritmo</button>
     </div>
-    <div class="info-block">
-      <div class="label">Negación ¬φ (NNF)</div>
-      <div class="neg-formula" id="negphi-display"></div>
+    <!-- Paso pane -->
+    <div class="tab-pane" id="pane-paso">
+      <div class="info-block">
+        <div class="label">Propiedad φ</div>
+        <div class="formula" id="phi-display"></div>
+      </div>
+      <div class="info-block">
+        <div class="label">Negación ¬φ (NNF)</div>
+        <div class="neg-formula" id="negphi-display"></div>
+      </div>
+      <div class="info-block">
+        <div class="label">Etapa</div>
+        <div class="stage-title" id="stage-title-text"></div>
+        <div class="stage-desc" id="stage-desc-text"></div>
+      </div>
+      <div class="info-block" id="result-block" style="display:none">
+        <div class="label">Resultado</div>
+        <div id="result-badge-wrap"></div>
+        <div class="ce-path" id="ce-display" style="margin-top:8px"></div>
+      </div>
+      <div class="spacer"></div>
+      <div style="font-size:.67rem;color:var(--gray);text-align:center;line-height:1.5">LTL → GPVW → Büchi → Producto M×A → Nested DFS</div>
     </div>
-    <div class="info-block">
-      <div class="label">Paso actual</div>
-      <div class="stage-title" id="stage-title-text"></div>
-      <div class="stage-desc" id="stage-desc-text"></div>
-    </div>
-    <div class="info-block" id="result-block" style="display:none">
-      <div class="label">Resultado</div>
-      <div id="result-badge-wrap"></div>
-      <div class="ce-path" id="ce-display" style="margin-top:8px"></div>
-    </div>
-    <div class="spacer"></div>
-    <div style="font-size:.72rem;color:var(--gray);text-align:center;line-height:1.4">
-      LTL → GPVW → Büchi → Producto M×A → Nested DFS
+    <!-- Algoritmo pane -->
+    <div class="tab-pane hidden" id="pane-algo">
+      <div class="algo-header">
+        <div class="atitle">Model Checking LTL</div>
+        <div style="font-size:.72rem;color:var(--sub);margin-top:3px">Verificación formal automática de sistemas reactivos</div>
+        <div class="aformula">M ⊨ φ  ⟺  L(M) ∩ L(A¬φ) = ∅</div>
+      </div>
+      <div class="algo-section-title">Pipeline completo</div>
+      <div class="algo-step c1" id="astep-0">
+        <div class="step-num">①</div>
+        <div class="step-body">
+          <div class="step-name">Estructura de Kripke</div>
+          <div class="step-detail">El sistema se modela como <code>M = (S, s₀, R, L)</code>. Cada estado tiene un conjunto de proposiciones atómicas verdaderas. Las transiciones modelan la evolución del sistema en el tiempo.</div>
+        </div>
+      </div>
+      <div class="algo-step c2" id="astep-1">
+        <div class="step-num">②</div>
+        <div class="step-body">
+          <div class="step-name">Negación + NNF</div>
+          <div class="step-detail">En lugar de verificar φ directamente, buscamos trazas que <em>violan</em> φ. La negación se lleva hasta los átomos: <code>¬Gφ → F¬φ</code>, <code>¬Fφ → G¬φ</code>, <code>¬¬φ → φ</code>.</div>
+        </div>
+      </div>
+      <div class="algo-step c3" id="astep-2">
+        <div class="step-num">③</div>
+        <div class="step-body">
+          <div class="step-name">GPVW → Büchi A(¬φ)</div>
+          <div class="step-detail">Algoritmo tableau de <em>Gerth, Peled, Vardi, Wolper (1995)</em>. Cada estado = conjunto de obligaciones LTL pendientes. Acepta exactamente las trazas donde ¬φ se satisface. Mismo algoritmo que <code>SPIN</code> y <code>LTL2BA</code>.</div>
+        </div>
+      </div>
+      <div class="algo-step c4" id="astep-3">
+        <div class="step-num">④</div>
+        <div class="step-body">
+          <div class="step-name">Producto M × A</div>
+          <div class="step-detail">Combina el sistema con el Büchi. Un estado <code>(s, q)</code> es aceptante si <code>q ∈ F</code>. Construcción <em>on-the-fly</em>: solo se generan los estados alcanzables desde el estado inicial.</div>
+        </div>
+      </div>
+      <div class="algo-step c5" id="astep-4">
+        <div class="step-num">⑤</div>
+        <div class="step-body">
+          <div class="step-name">Nested DFS — exterior</div>
+          <div class="step-detail">Recorre el grafo del producto en profundidad. Al terminar de explorar un estado aceptante, lanza el DFS interior. El <em>prefijo</em> es el camino hasta ese estado.</div>
+        </div>
+      </div>
+      <div class="algo-step c6" id="astep-5">
+        <div class="step-num">⑥</div>
+        <div class="step-body">
+          <div class="step-name">Nested DFS — interior</div>
+          <div class="step-detail">Desde el estado aceptante, busca un camino de regreso a sí mismo. Si lo encuentra: existe un <em>ciclo aceptante</em> = traza infinita donde φ falla. <span class="complexity-tag">O(|V|+|E|)</span></div>
+        </div>
+      </div>
+      <div class="algo-step c7" id="astep-6">
+        <div class="step-num">⑦</div>
+        <div class="step-body">
+          <div class="step-name">Resultado</div>
+          <div class="step-detail"><strong style="color:var(--green)">✅ Verificado</strong> — no existe ciclo aceptante, por lo tanto M ⊨ φ en todos los comportamientos posibles.<br><br><strong style="color:var(--red)">❌ Violado</strong> — contraejemplo = <code>(prefijo · ciclo)^ω</code>, traza infinita concreta y verificable.</div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <div style="font-size:.67rem;color:var(--gray);text-align:center;line-height:1.5">El ciclo detectado corresponde a una traza infinita real del sistema donde φ es falsa en infinitos pasos (criterio de aceptación de Büchi).</div>
     </div>
   </aside>
   <section id="viz">
@@ -88,52 +178,75 @@ input[type=range] { accent-color: var(--blue); width: 90px; }
   </section>
 </div>
 <footer>
-  <button class="ctrl-btn" id="btn-prev">◀ Anterior</button>
+  <button class="ctrl-btn" id="btn-prev" disabled>◀ Anterior</button>
   <div class="progress-dots" id="progress-dots"></div>
   <button class="ctrl-btn" id="btn-auto">▶ Auto</button>
   <button class="ctrl-btn primary" id="btn-next">Siguiente ▶</button>
-  <div class="speed-wrap">Vel: <input type="range" id="speed-slider" min="400" max="3000" step="200" value="1400"></div>
+  <div class="speed-wrap">Vel: <input type="range" id="speed-slider" min="400" max="3500" step="200" value="1600"></div>
 </footer>
 <script>
-const DATA = [{"id":"semaforo","name":"Semáforo","phi":"G F verde","phi_html":"G F <em>verde</em>","neg_phi":"F(G(!verde))","kripke":{"states":["rojo","verde","amarillo"],"initial":"rojo","transitions":[{"from":"rojo","to":"verde"},{"from":"verde","to":"amarillo"},{"from":"amarillo","to":"rojo"}],"labels":{"rojo":["rojo"],"verde":["verde"],"amarillo":["amarillo"]}},"buchi":{"n_states":2,"initial":0,"transitions":[{"from":0,"guard":"!verde","to":1},{"from":0,"guard":"T","to":0},{"from":1,"guard":"!verde","to":1}],"accepting":[1]},"product":{"states":[{"k":"rojo","b":0},{"k":"verde","b":1},{"k":"verde","b":0},{"k":"amarillo","b":0},{"k":"rojo","b":1}],"initial":[0],"transitions":[{"from":0,"to":1},{"from":3,"to":4},{"from":3,"to":0},{"from":2,"to":3},{"from":0,"to":2},{"from":4,"to":1}],"accepting":[1,4]},"result":true,"counterexample":null},{"id":"exclusion","name":"Exclusión Mutua","phi":"G F critica_A","phi_html":"G F <em>critica_A</em>","neg_phi":"F(G(!critica_A))","kripke":{"states":["idle_idle","req_idle","crit_idle","idle_req","req_req","idle_crit"],"initial":"idle_idle","transitions":[{"from":"idle_idle","to":"req_idle"},{"from":"idle_idle","to":"idle_req"},{"from":"req_idle","to":"crit_idle"},{"from":"req_idle","to":"req_req"},{"from":"crit_idle","to":"idle_idle"},{"from":"idle_req","to":"idle_crit"},{"from":"idle_req","to":"req_req"},{"from":"idle_crit","to":"idle_idle"},{"from":"req_req","to":"crit_idle"},{"from":"req_req","to":"idle_crit"}],"labels":{"crit_idle":["critica_A"],"idle_crit":["critica_B"],"req_idle":["request_A"],"idle_req":["request_B"],"req_req":["request_A","request_B"],"idle_idle":[]}},"buchi":{"n_states":2,"initial":0,"transitions":[{"from":0,"guard":"!critica_A","to":1},{"from":0,"guard":"T","to":0},{"from":1,"guard":"!critica_A","to":1}],"accepting":[1]},"product":{"states":[{"k":"idle_idle","b":0},{"k":"req_idle","b":1},{"k":"req_idle","b":0},{"k":"idle_req","b":1},{"k":"idle_req","b":0},{"k":"crit_idle","b":1},{"k":"req_req","b":1},{"k":"crit_idle","b":0},{"k":"req_req","b":0},{"k":"idle_crit","b":1},{"k":"idle_crit","b":0},{"k":"idle_idle","b":1}],"initial":[0],"transitions":[{"from":4,"to":9},{"from":4,"to":6},{"from":0,"to":2},{"from":8,"to":9},{"from":10,"to":0},{"from":1,"to":6},{"from":9,"to":11},{"from":2,"to":5},{"from":2,"to":8},{"from":6,"to":5},{"from":3,"to":9},{"from":4,"to":8},{"from":3,"to":6},{"from":8,"to":5},{"from":0,"to":1},{"from":11,"to":1},{"from":10,"to":11},{"from":0,"to":4},{"from":2,"to":7},{"from":1,"to":5},{"from":7,"to":0},{"from":4,"to":10},{"from":8,"to":7},{"from":0,"to":3},{"from":8,"to":10},{"from":11,"to":3},{"from":2,"to":6},{"from":6,"to":9}],"accepting":[1,3,5,6,9,11]},"result":false,"counterexample":{"prefix":[{"k":"idle_idle","b":0},{"k":"req_idle","b":0},{"k":"req_req","b":0},{"k":"idle_crit","b":1},{"k":"idle_idle","b":1},{"k":"req_idle","b":1},{"k":"req_req","b":1}],"cycle":[{"k":"req_req","b":1},{"k":"idle_crit","b":1},{"k":"idle_idle","b":1},{"k":"req_idle","b":1},{"k":"req_req","b":1}]}},{"id":"protocolo","name":"Protocolo con Bug","phi":"G F grant","phi_html":"G F <em>grant</em>","neg_phi":"F(G(!grant))","kripke":{"states":["idle","request","grant","deny"],"initial":"idle","transitions":[{"from":"idle","to":"request"},{"from":"request","to":"grant"},{"from":"request","to":"deny"},{"from":"grant","to":"idle"},{"from":"deny","to":"request"}],"labels":{"idle":[],"request":["request"],"grant":["grant"],"deny":["deny"]}},"buchi":{"n_states":2,"initial":0,"transitions":[{"from":0,"guard":"!grant","to":1},{"from":0,"guard":"T","to":0},{"from":1,"guard":"!grant","to":1}],"accepting":[1]},"product":{"states":[{"k":"idle","b":0},{"k":"request","b":1},{"k":"request","b":0},{"k":"grant","b":1},{"k":"deny","b":1},{"k":"grant","b":0},{"k":"deny","b":0}],"initial":[0],"transitions":[{"from":0,"to":1},{"from":2,"to":4},{"from":6,"to":2},{"from":4,"to":1},{"from":6,"to":1},{"from":1,"to":4},{"from":2,"to":3},{"from":0,"to":2},{"from":2,"to":6},{"from":5,"to":0},{"from":2,"to":5},{"from":1,"to":3}],"accepting":[1,3,4]},"result":false,"counterexample":{"prefix":[{"k":"idle","b":0},{"k":"request","b":1},{"k":"deny","b":1}],"cycle":[{"k":"deny","b":1},{"k":"request","b":1},{"k":"deny","b":1}]}}];
+const DATA = [{"id":"semaforo","name":"Semáforo","phi":"G F verde","neg_phi":"F(G(!verde))","kripke":{"states":["rojo","verde","amarillo"],"initial":"rojo","transitions":[{"from":"rojo","to":"verde"},{"from":"verde","to":"amarillo"},{"from":"amarillo","to":"rojo"}],"labels":{"rojo":["rojo"],"verde":["verde"],"amarillo":["amarillo"]}},"buchi":{"n_states":2,"initial":0,"transitions":[{"from":0,"guard":"!verde","to":1},{"from":0,"guard":"T","to":0},{"from":1,"guard":"!verde","to":1}],"accepting":[1]},"product":{"states":[{"k":"rojo","b":0},{"k":"verde","b":1},{"k":"verde","b":0},{"k":"amarillo","b":0},{"k":"rojo","b":1}],"initial":[0],"transitions":[{"from":0,"to":1},{"from":3,"to":4},{"from":3,"to":0},{"from":2,"to":3},{"from":0,"to":2},{"from":4,"to":1}],"accepting":[1,4]},"result":true,"counterexample":null},{"id":"exclusion","name":"Exclusión Mutua","phi":"G F critica_A","neg_phi":"F(G(!critica_A))","kripke":{"states":["idle_idle","req_idle","crit_idle","idle_req","req_req","idle_crit"],"initial":"idle_idle","transitions":[{"from":"idle_idle","to":"req_idle"},{"from":"idle_idle","to":"idle_req"},{"from":"req_idle","to":"crit_idle"},{"from":"req_idle","to":"req_req"},{"from":"crit_idle","to":"idle_idle"},{"from":"idle_req","to":"idle_crit"},{"from":"idle_req","to":"req_req"},{"from":"idle_crit","to":"idle_idle"},{"from":"req_req","to":"crit_idle"},{"from":"req_req","to":"idle_crit"}],"labels":{"crit_idle":["critica_A"],"idle_crit":["critica_B"],"req_idle":["request_A"],"idle_req":["request_B"],"req_req":["request_A","request_B"],"idle_idle":[]}},"buchi":{"n_states":2,"initial":0,"transitions":[{"from":0,"guard":"!critica_A","to":1},{"from":0,"guard":"T","to":0},{"from":1,"guard":"!critica_A","to":1}],"accepting":[1]},"product":{"states":[{"k":"idle_idle","b":0},{"k":"req_idle","b":1},{"k":"req_idle","b":0},{"k":"idle_req","b":1},{"k":"idle_req","b":0},{"k":"crit_idle","b":1},{"k":"req_req","b":1},{"k":"crit_idle","b":0},{"k":"req_req","b":0},{"k":"idle_crit","b":1},{"k":"idle_crit","b":0},{"k":"idle_idle","b":1}],"initial":[0],"transitions":[{"from":4,"to":9},{"from":4,"to":6},{"from":0,"to":2},{"from":8,"to":9},{"from":10,"to":0},{"from":1,"to":6},{"from":9,"to":11},{"from":2,"to":5},{"from":2,"to":8},{"from":6,"to":5},{"from":3,"to":9},{"from":4,"to":8},{"from":3,"to":6},{"from":8,"to":5},{"from":0,"to":1},{"from":11,"to":1},{"from":10,"to":11},{"from":0,"to":4},{"from":2,"to":7},{"from":1,"to":5},{"from":7,"to":0},{"from":4,"to":10},{"from":8,"to":7},{"from":0,"to":3},{"from":8,"to":10},{"from":11,"to":3},{"from":2,"to":6},{"from":6,"to":9}],"accepting":[1,3,5,6,9,11]},"result":false,"counterexample":{"prefix":[{"k":"idle_idle","b":0},{"k":"req_idle","b":0},{"k":"req_req","b":0},{"k":"idle_crit","b":1},{"k":"idle_idle","b":1},{"k":"req_idle","b":1},{"k":"req_req","b":1}],"cycle":[{"k":"req_req","b":1},{"k":"idle_crit","b":1},{"k":"idle_idle","b":1},{"k":"req_idle","b":1},{"k":"req_req","b":1}]}},{"id":"protocolo","name":"Protocolo con Bug","phi":"G F grant","neg_phi":"F(G(!grant))","kripke":{"states":["idle","request","grant","deny"],"initial":"idle","transitions":[{"from":"idle","to":"request"},{"from":"request","to":"grant"},{"from":"request","to":"deny"},{"from":"grant","to":"idle"},{"from":"deny","to":"request"}],"labels":{"idle":[],"request":["request"],"grant":["grant"],"deny":["deny"]}},"buchi":{"n_states":2,"initial":0,"transitions":[{"from":0,"guard":"!grant","to":1},{"from":0,"guard":"T","to":0},{"from":1,"guard":"!grant","to":1}],"accepting":[1]},"product":{"states":[{"k":"idle","b":0},{"k":"request","b":1},{"k":"request","b":0},{"k":"grant","b":1},{"k":"deny","b":1},{"k":"grant","b":0},{"k":"deny","b":0}],"initial":[0],"transitions":[{"from":0,"to":1},{"from":2,"to":4},{"from":6,"to":2},{"from":4,"to":1},{"from":6,"to":1},{"from":1,"to":4},{"from":2,"to":3},{"from":0,"to":2},{"from":2,"to":6},{"from":5,"to":0},{"from":2,"to":5},{"from":1,"to":3}],"accepting":[1,3,4]},"result":false,"counterexample":{"prefix":[{"k":"idle","b":0},{"k":"request","b":1},{"k":"deny","b":1}],"cycle":[{"k":"deny","b":1},{"k":"request","b":1},{"k":"deny","b":1}]}}];
 
+// ── stage definitions ──────────────────────────────────────────────────────
 const STAGE_DEFS = [
-  { title:'Paso 1 / 7 — Sistema (Estructura de Kripke)', desc: ex=>`El sistema <strong>${ex.name}</strong> se modela como M = (S, s₀, R, L). Tiene ${ex.kripke.states.length} estados y ${ex.kripke.transitions.length} transiciones. Estado inicial (verde): <strong>${ex.kripke.initial}</strong>.`, render: renderKripke },
-  { title:'Paso 2 / 7 — Negación y Forma Normal Negativa', desc: ex=>`Para verificar φ buscamos trazas que <em>violan</em> φ, es decir, satisfacen ¬φ.<br><br>¬φ en NNF = <strong>${ex.neg_phi}</strong><br><br>M ⊨ φ ⟺ L(M) ∩ L(A¬φ) = ∅`, render: renderNegation },
-  { title:'Paso 3 / 7 — Autómata de Büchi A(¬φ)', desc: ex=>`GPVW construye un NBA que acepta las trazas donde φ falla. ${ex.buchi.n_states} estados; los de aceptación (amarillo, doble círculo) deben visitarse ∞ veces.`, render: renderBuchi },
-  { title:'Paso 4 / 7 — Producto M × A', desc: ex=>`El producto combina sistema y Büchi: ${ex.product.states.length} estados, ${ex.product.accepting.length} aceptantes (amarillo). Buscamos ciclo aceptante con Nested DFS.`, render: renderProduct },
-  { title:'Paso 5 / 7 — Nested DFS — Búsqueda exterior', desc: ex=>ex.result?`DFS externo completa sin encontrar ningún estado aceptante en ciclo.`:`DFS externo alcanza estado aceptante por el camino prefijo (naranja): termina en <strong>(${ex.counterexample.prefix.at(-1).k}, q${ex.counterexample.prefix.at(-1).b})</strong>.`, render: renderDFSOuter },
-  { title:'Paso 6 / 7 — Nested DFS — Ciclo encontrado', desc: ex=>ex.result?`DFS interno no encuentra camino de regreso a ningún estado aceptante. No existe ciclo aceptante → propiedad <strong>VERIFICADA</strong>.`:`Ciclo aceptante detectado (rojo): <strong>${ex.counterexample.cycle.map(s=>s.k).join(' → ')}</strong>. Bug detectado formalmente.`, render: renderDFSInner },
-  { title:'Paso 7 / 7 — Resultado final', desc: ex=>ex.result?`No existe traza infinita donde φ falle. Garantía formal: <strong>M ⊨ ${ex.phi}</strong> en todos los comportamientos posibles.`:`Traza infinita que viola <strong>${ex.phi}</strong>:<br><br>Prefijo: ${ex.counterexample.prefix.map(s=>s.k).join(' → ')}<br>Ciclo: (${ex.counterexample.cycle.map(s=>s.k).join(' → ')})^ω`, render: renderResult }
+  { title:'1 / 7 — Sistema (Estructura de Kripke)',
+    desc: ex=>`<strong>${ex.name}</strong> modelado como M = (S, s₀, R, L).<br><br>${ex.kripke.states.length} estados · ${ex.kripke.transitions.length} transiciones · estado inicial (verde): <strong>${ex.kripke.initial}</strong>.<br><br>Las etiquetas indican qué proposiciones son verdaderas en cada estado.`,
+    render: renderKripke },
+  { title:'2 / 7 — Negación ¬φ y Forma Normal Negativa',
+    desc: ex=>`Para encontrar una violación de φ construimos el autómata de <strong>¬φ</strong>.<br><br>¬φ en NNF: <span style="color:var(--orange);font-family:monospace">${ex.neg_phi}</span><br><br>Criterio: M ⊨ φ ⟺ L(M) ∩ L(A¬φ) = ∅`,
+    render: renderNegation },
+  { title:'3 / 7 — Autómata de Büchi A(¬φ)',
+    desc: ex=>`GPVW construye un NBA que acepta exactamente las trazas donde φ falla.<br><br>${ex.buchi.n_states} estados · estados de aceptación (doble círculo, amarillo) deben aparecer <strong>infinitas veces</strong> en una ejecución aceptante.`,
+    render: renderBuchi },
+  { title:'4 / 7 — Producto M × A (construcción on-the-fly)',
+    desc: ex=>`El producto combina sistema y Büchi: un estado <code>(s,q)</code> es aceptante si q ∈ F.<br><br>${ex.product.states.length} estados alcanzables · ${ex.product.accepting.length} aceptantes (amarillo) · ${ex.product.transitions.length} transiciones.<br><br>Buscamos un ciclo que pase por un estado aceptante.`,
+    render: renderProduct },
+  { title:'5 / 7 — Nested DFS — búsqueda exterior (prefijo)',
+    desc: ex=>ex.result
+      ? `DFS exterior explora todo el grafo del producto sin encontrar ningún ciclo aceptante.`
+      : `DFS exterior alcanza el estado aceptante <strong>(${ex.counterexample.prefix.at(-1).k}, q${ex.counterexample.prefix.at(-1).b})</strong>.<br><br>El camino naranja es el <em>prefijo</em> del contraejemplo — la ruta desde el estado inicial hasta el primer estado aceptante visitado.`,
+    render: renderDFSOuter },
+  { title:'6 / 7 — Nested DFS — búsqueda interior (ciclo)',
+    desc: ex=>ex.result
+      ? `DFS interior no encuentra ningún camino de regreso a un estado aceptante.<br><br>No existe ciclo aceptante → <strong style="color:var(--green)">φ verificada</strong>.`
+      : `DFS interior detecta el ciclo aceptante (rojo):<br><br><span style="font-family:monospace;color:var(--red)">${ex.counterexample.cycle.map(s=>s.k).join(' → ')}</span><br><br>Este ciclo es evidencia formal de que φ es violada infinitamente.`,
+    render: renderDFSInner },
+  { title:'7 / 7 — Resultado final',
+    desc: ex=>ex.result
+      ? `No existe traza infinita donde φ falle.<br><br>Garantía formal: <strong>M ⊨ ${ex.phi}</strong> en todos los comportamientos posibles del sistema.`
+      : `Traza infinita que viola <strong>${ex.phi}</strong>:<br><br><span style="color:var(--orange);font-family:monospace">Prefijo: ${ex.counterexample.prefix.map(s=>s.k).join(' → ')}</span><br><span style="color:var(--red);font-family:monospace">Ciclo: (${ex.counterexample.cycle.map(s=>s.k).join(' → ')})^ω</span>`,
+    render: renderResult }
 ];
 
+// ── state ──────────────────────────────────────────────────────────────────
 let exIdx=0, stage=0, autoTimer=null;
 const svg=d3.select('#graph-svg'), W=780, H=460;
 const C={blue:'#89b4fa',green:'#a6e3a1',red:'#f38ba8',yellow:'#f9e2af',orange:'#fab387',gray:'#585b70',bg:'#1e1e2e',white:'#cdd6f4',sub:'#a6adc8'};
-
 const ABBR={idle_idle:'ii',req_idle:'ri',crit_idle:'ci',idle_req:'ir',req_req:'rr',idle_crit:'ic'};
-function abbreviate(s){return ABBR[s]||s;}
-function prodLabel(s){return `${abbreviate(s.k)}\nq${s.b}`;}
+function abbr(s){return ABBR[s]||s;}
+function prodLabel(s){return abbr(s.k)+'\nq'+s.b;}
 
+// ── layout helpers ─────────────────────────────────────────────────────────
 function circularPos(n,cx,cy,r){return Array.from({length:n},(_,i)=>({x:cx+r*Math.cos(2*Math.PI*i/n-Math.PI/2),y:cy+r*Math.sin(2*Math.PI*i/n-Math.PI/2)}));}
 
 function forcePos(nodes,links,cx,cy){
   const ns=nodes.map((n,i)=>({id:i,...n}));
   const ls=links.map(l=>({source:l.from,target:l.to}));
   const sim=d3.forceSimulation(ns)
-    .force('link',d3.forceLink(ls).id(d=>d.id).distance(90).strength(.8))
-    .force('charge',d3.forceManyBody().strength(-280))
+    .force('link',d3.forceLink(ls).id(d=>d.id).distance(88).strength(.9))
+    .force('charge',d3.forceManyBody().strength(-290))
     .force('center',d3.forceCenter(cx,cy))
-    .force('collide',d3.forceCollide(48))
+    .force('collide',d3.forceCollide(46))
     .stop();
-  for(let i=0;i<800;i++)sim.tick();
+  for(let i=0;i<900;i++)sim.tick();
   return ns.map(n=>({x:n.x,y:n.y}));
 }
 
+// ── svg helpers ────────────────────────────────────────────────────────────
 function setupDefs(){
   svg.selectAll('defs').remove();
   const defs=svg.append('defs');
-  for(const[id,col]of[['arrow','#585b70'],['arrow-blue','#89b4fa'],['arrow-red','#f38ba8'],['arrow-orange','#fab387'],['arrow-green','#a6e3a1']]){
+  for(const[id,col]of[['arr','#585b70'],['arr-blue','#89b4fa'],['arr-red','#f38ba8'],['arr-orange','#fab387'],['arr-green','#a6e3a1'],['arr-yellow','#f9e2af']]){
     defs.append('marker').attr('id',id).attr('viewBox','0 -4 8 8').attr('refX',8).attr('refY',0).attr('markerWidth',6).attr('markerHeight',6).attr('orient','auto')
       .append('path').attr('d','M0,-4L8,0L0,4Z').attr('fill',col);
   }
@@ -141,149 +254,315 @@ function setupDefs(){
 function clearSVG(){svg.selectAll('*').remove();setupDefs();}
 
 function edgePath(x1,y1,x2,y2,curv,R,isSelf){
-  if(isSelf){return `M${x1-14},${y1-R} C${x1-38},${y1-R-55} ${x1+38},${y1-R-55} ${x1+14},${y1-R}`;}
+  if(isSelf){return `M${x1-14},${y1-R} C${x1-40},${y1-R-60} ${x1+40},${y1-R-60} ${x1+14},${y1-R}`;}
   const dx=x2-x1,dy=y2-y1,dist=Math.hypot(dx,dy)||1;
   const nx=-dy/dist,ny=dx/dist;
   const mx=(x1+x2)/2+nx*curv,my=(y1+y2)/2+ny*curv;
-  const sx=x1+(mx-x1)/dist*R,sy=y1+(my-y1)/dist*R;
-  const ex2=x2+(mx-x2)/dist*(R+4),ey2=y2+(my-y2)/dist*(R+4);
-  return `M${sx},${sy} Q${mx},${my} ${ex2},${ey2}`;
+  return `M${x1+(mx-x1)/dist*R},${y1+(my-y1)/dist*R} Q${mx},${my} ${x2+(mx-x2)/dist*(R+5)},${y2+(my-y2)/dist*(R+5)}`;
 }
 
-function drawGraph({nodes,edges,pos,nodeR=36,accepting=new Set(),initial=-1,nodeColor=()=>C.blue,edgeColor=()=>C.gray,edgeLabel=()=>'',nodeText=i=>String(i),markerSuffix=()=>''}){
+// Animate a path with stroke-dashoffset (drawing effect)
+function animPath(pathSel,delay,dur=420){
+  pathSel.each(function(){
+    const el=d3.select(this);
+    let len;try{len=this.getTotalLength();}catch(e){return;}
+    el.attr('stroke-dasharray',len).attr('stroke-dashoffset',len)
+      .transition().delay(delay).duration(dur).ease(d3.easeCubicOut)
+      .attr('stroke-dashoffset',0);
+  });
+}
+
+// ── core draw ──────────────────────────────────────────────────────────────
+function drawGraph({nodes,edges,pos,nodeR=36,accepting=new Set(),initial=-1,
+  nodeColor=()=>C.blue,edgeColor=()=>C.gray,edgeLabel=()=>'',nodeText=i=>String(i),
+  markerId=()=>'arr',animBase=true,animDelay=0}){
+
   const g=svg.append('g');
-  const pairCount={},pairIdx={};
-  edges.forEach(e=>{const k=`${e.from}-${e.to}`;pairCount[k]=(pairCount[k]||0)+1;});
+  // count parallel edges
+  const pairCnt={},pairIdx={};
+  edges.forEach(e=>{const k=`${e.from}-${e.to}`;pairCnt[k]=(pairCnt[k]||0)+1;});
   edges.forEach(e=>{const k=`${e.from}-${e.to}`;pairIdx[k]=pairIdx[k]||0;});
-  edges.forEach(e=>{
+
+  // draw edges
+  edges.forEach((e,ei)=>{
     const k=`${e.from}-${e.to}`,rk=`${e.to}-${e.from}`;
     const idx=pairIdx[k]++;
-    const hasRev=(pairCount[rk]||0)>0;
-    const curv=hasRev?34:(pairCount[k]>1?24*(idx-(pairCount[k]-1)/2):0);
-    const isSelf=e.from===e.to;
+    const hasRev=(pairCnt[rk]||0)>0;
+    const curv=hasRev?36:(pairCnt[k]>1?26*(idx-(pairCnt[k]-1)/2):0);
+    const self=e.from===e.to;
     const x1=pos[e.from].x,y1=pos[e.from].y,x2=pos[e.to].x,y2=pos[e.to].y;
-    const col=edgeColor(e),ms=markerSuffix(e);
-    g.append('path').attr('d',edgePath(x1,y1,x2,y2,curv,nodeR,isSelf)).attr('fill','none').attr('stroke',col).attr('stroke-width',1.7).attr('marker-end',`url(#arrow${ms})`);
+    const path=g.append('path').attr('d',edgePath(x1,y1,x2,y2,curv,nodeR,self))
+      .attr('fill','none').attr('stroke',edgeColor(e)).attr('stroke-width',1.8)
+      .attr('marker-end',`url(#${markerSel(e,markerId)})`);
+    if(animBase) animPath(path, animDelay + ei*18, 280);
+
+    // edge label
     const lbl=edgeLabel(e);
     if(lbl){
-      const isSelfL=isSelf;
-      const mx2=isSelfL?x1:(x1+x2)/2+(-(y2-y1)/Math.hypot(x2-x1,y2-y1)||0)*(hasRev?36:20);
-      const my2=isSelfL?y1-nodeR-40:(y1+y2)/2+((x2-x1)/Math.hypot(x2-x1,y2-y1)||0)*(hasRev?36:20)-(hasRev?18:0);
-      g.append('text').attr('x',mx2).attr('y',my2).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',9).attr('font-family','Courier New').text(lbl);
+      const midDelay=animBase?(animDelay+ei*18+280):0;
+      const lx=self?x1:(x1+x2)/2+(-(y2-y1)/Math.hypot(x2-x1,y2-y1)||0)*(hasRev?38:22);
+      const ly=self?y1-nodeR-40:(y1+y2)/2+((x2-x1)/Math.hypot(x2-x1,y2-y1)||0)*(hasRev?38:22)-(hasRev?20:0);
+      const lbl_el=g.append('text').attr('x',lx).attr('y',ly).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',9).attr('font-family','Courier New').text(lbl);
+      if(animBase) lbl_el.attr('opacity',0).transition().delay(midDelay).duration(200).attr('opacity',1);
     }
   });
+
+  // draw nodes
   nodes.forEach((_,i)=>{
     const{x,y}=pos[i],col=nodeColor(i),isAcc=accepting.has(i);
-    if(isAcc)g.append('circle').attr('cx',x).attr('cy',y).attr('r',nodeR+7).attr('fill','none').attr('stroke',C.yellow).attr('stroke-width',2.5);
-    g.append('circle').attr('cx',x).attr('cy',y).attr('r',nodeR).attr('fill',col).attr('stroke','#1e1e2e').attr('stroke-width',2.5);
+    const delay=animDelay + edges.length*18 + i*55;
+    // acceptance ring
+    if(isAcc){
+      const ring=g.append('circle').attr('cx',x).attr('cy',y).attr('r',nodeR+8).attr('fill','none').attr('stroke',C.yellow).attr('stroke-width',2.5);
+      if(animBase) ring.attr('opacity',0).transition().delay(delay).duration(300).attr('opacity',1);
+    }
+    // node circle
+    const circ=g.append('circle').attr('cx',x).attr('cy',y).attr('fill',col).attr('stroke','#1e1e2e').attr('stroke-width',2.5);
+    if(animBase){
+      circ.attr('r',0).attr('opacity',0)
+        .transition().delay(delay).duration(300).ease(d3.easeBackOut.overshoot(1.4))
+        .attr('r',nodeR).attr('opacity',1);
+    } else { circ.attr('r',nodeR); }
+    // label
     const lbl=nodeText(i),lines=lbl.split('\n');
-    lines.forEach((ln,li)=>g.append('text').attr('x',x).attr('y',y+(li-(lines.length-1)/2)*13+1).attr('text-anchor','middle').attr('dominant-baseline','middle').attr('fill','#1e1e2e').attr('font-size',lbl.replace('\n','').length>10?7:lbl.replace('\n','').length>6?9:11).attr('font-family','Courier New').attr('font-weight','bold').text(ln));
+    lines.forEach((ln,li)=>{
+      const txt=g.append('text').attr('x',x).attr('y',y+(li-(lines.length-1)/2)*13+1)
+        .attr('text-anchor','middle').attr('dominant-baseline','middle')
+        .attr('fill','#1e1e2e').attr('font-size',lbl.replace('\n','').length>10?7:lbl.replace('\n','').length>6?9:11)
+        .attr('font-family','Courier New').attr('font-weight','bold').text(ln);
+      if(animBase) txt.attr('opacity',0).transition().delay(delay+200).duration(200).attr('opacity',1);
+    });
   });
+
+  // initial arrow
   if(initial>=0){
-    const{x,y}=pos[initial],ang=-Math.PI*.72;
-    g.append('line').attr('x1',x+Math.cos(ang)*72).attr('y1',y+Math.sin(ang)*72).attr('x2',x+Math.cos(ang)*(nodeR+5)).attr('y2',y+Math.sin(ang)*(nodeR+5)).attr('stroke',C.green).attr('stroke-width',2.5).attr('marker-end','url(#arrow-green)');
+    const{x,y}=pos[initial],ang=-Math.PI*.72,D=72;
+    const arr=g.append('line').attr('x1',x+Math.cos(ang)*D).attr('y1',y+Math.sin(ang)*D)
+      .attr('x2',x+Math.cos(ang)*(nodeR+5)).attr('y2',y+Math.sin(ang)*(nodeR+5))
+      .attr('stroke',C.green).attr('stroke-width',2.5).attr('marker-end','url(#arr-green)');
+    if(animBase) arr.attr('opacity',0).transition().delay(animDelay+edges.length*18+100).duration(300).attr('opacity',1);
   }
+  return g;
+}
+function markerSel(e,markerIdFn){return markerIdFn(e);}
+
+// Draw an overlay path (DFS trace) with sequential animation
+function drawTracePath(pos,states,nodeR,edgeList,strokeColor,markerId,baseDelay,stepDelay=350){
+  const g=svg.append('g');
+  edgeList.forEach((e,i)=>{
+    const x1=pos[e.from].x,y1=pos[e.from].y,x2=pos[e.to].x,y2=pos[e.to].y;
+    const path=g.append('path').attr('d',edgePath(x1,y1,x2,y2,0,nodeR+2,e.from===e.to))
+      .attr('fill','none').attr('stroke',strokeColor).attr('stroke-width',3.5)
+      .attr('marker-end',`url(#${markerId})`);
+    animPath(path, baseDelay+i*stepDelay, 380);
+  });
+  return g;
+}
+
+// Highlight nodes (recolor) with delay
+function highlightNodes(pos,indices,color,nodeR,delay){
+  const g=svg.append('g');
+  indices.forEach((i,j)=>{
+    g.append('circle').attr('cx',pos[i].x).attr('cy',pos[i].y).attr('r',nodeR)
+      .attr('fill',color).attr('stroke','#1e1e2e').attr('stroke-width',2.5)
+      .attr('opacity',0)
+      .transition().delay(delay+j*120).duration(300)
+      .attr('opacity',1);
+  });
+  return g;
+}
+
+// ── render functions ───────────────────────────────────────────────────────
+let _cachedProductPos = null, _cachedProductKey = '';
+
+function getProductPos(ex){
+  const key=ex.id;
+  if(_cachedProductKey===key && _cachedProductPos) return _cachedProductPos;
+  const p=ex.product, n=p.states.length;
+  const pos=n<=5?circularPos(n,W/2,H/2,160):forcePos(p.states,p.transitions,W/2,H/2-10);
+  _cachedProductKey=key;
+  _cachedProductPos=pos;
+  return pos;
 }
 
 function renderKripke(ex,hiNodes=new Set()){
   clearSVG();
   const k=ex.kripke,n=k.states.length;
-  const r=n<=3?150:n<=4?130:160;
-  const pos=circularPos(n,W/2,H/2-10,r);
-  drawGraph({nodes:k.states,edges:k.transitions,pos,nodeR:38,accepting:new Set(),initial:k.states.indexOf(k.initial),
+  const r=n<=3?155:n<=4?135:165;
+  const pos=circularPos(n,W/2,H/2-8,r);
+  drawGraph({nodes:k.states,edges:k.transitions,pos,nodeR:40,initial:k.states.indexOf(k.initial),
     nodeColor:i=>hiNodes.has(k.states[i])?C.red:(k.states[i]===k.initial?C.green:C.blue),
-    edgeColor:()=>C.gray,edgeLabel:()=>'',
-    nodeText:i=>{const lb=(k.labels[k.states[i]]||[]);return abbreviate(k.states[i])+(lb.length?'\n{'+lb.join(',')+'}':'');}
-  });
-  svg.append('text').attr('x',16).attr('y',H-14).attr('fill',C.sub).attr('font-size',10).text(`Kripke M: ${n} estados, ${k.transitions.length} transiciones`);
+    edgeLabel:()=>'',
+    nodeText:i=>{const lb=(k.labels[k.states[i]]||[]);return abbr(k.states[i])+(lb.length?'\n{'+lb.join(',')+'}':'');},
+    markerId:()=>'arr'});
+  svg.append('text').attr('x',16).attr('y',H-14).attr('fill',C.sub).attr('font-size',10).attr('opacity',0)
+    .text(`Kripke M: ${n} estados, ${k.transitions.length} transiciones`)
+    .transition().delay(600).duration(400).attr('opacity',1);
 }
 
 function renderNegation(ex){
   clearSVG();
-  const cx=W/2,cy=H/2-20,g=svg.append('g');
-  const box=(x,y,w,h,color,text,sub2)=>{
-    g.append('rect').attr('x',x-w/2).attr('y',y-h/2).attr('width',w).attr('height',h).attr('rx',10).attr('fill',color).attr('opacity',.12).attr('stroke',color).attr('stroke-width',1.5);
-    g.append('text').attr('x',x).attr('y',y-8).attr('text-anchor','middle').attr('fill',color).attr('font-size',18).attr('font-family','Courier New').attr('font-weight','bold').text(text);
-    g.append('text').attr('x',x).attr('y',y+14).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',11).text(sub2);
-  };
-  box(cx-195,cy,280,80,C.yellow,'φ = '+ex.phi,'Propiedad a verificar');
-  g.append('text').attr('x',cx).attr('y',cy+4).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',26).text('⟹');
-  g.append('text').attr('x',cx).attr('y',cy+22).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',10).text('negar + NNF');
-  box(cx+195,cy,280,80,C.orange,'¬φ = '+ex.neg_phi,'Buscamos trazas que violan φ');
-  g.append('text').attr('x',cx).attr('y',cy+78).attr('text-anchor','middle').attr('fill',C.white).attr('font-size',13).text('M ⊨ φ  ⟺  L(M) ∩ L(A¬φ) = ∅');
-  g.append('rect').attr('x',cx-310).attr('y',cy+100).attr('width',620).attr('height',54).attr('rx',8).attr('fill','#1e1e2e').attr('stroke','#363a4f');
-  g.append('text').attr('x',cx).attr('y',cy+122).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',11).text('GPVW: cada estado del Büchi = conjunto de obligaciones LTL pendientes');
-  g.append('text').attr('x',cx).attr('y',cy+143).attr('text-anchor','middle').attr('fill',C.gray).attr('font-size',10).attr('font-family','Courier New').text('Gerth, Peled, Vardi, Wolper (1995) — mismo algoritmo que SPIN / LTL2BA');
+  const cx=W/2,cy=H/2-22,g=svg.append('g');
+  // left box
+  const lb=g.append('g').attr('opacity',0);
+  lb.append('rect').attr('x',cx-335).attr('y',cy-48).attr('width',290).attr('height',96).attr('rx',12).attr('fill','rgba(249,226,175,.08)').attr('stroke',C.yellow).attr('stroke-width',1.5);
+  lb.append('text').attr('x',cx-190).attr('y',cy-12).attr('text-anchor','middle').attr('fill',C.yellow).attr('font-size',15).attr('font-family','Courier New').attr('font-weight','bold').text('φ = '+ex.phi);
+  lb.append('text').attr('x',cx-190).attr('y',cy+14).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',11).text('Propiedad a verificar');
+  lb.transition().duration(400).attr('opacity',1);
+  // arrow
+  const ar=g.append('g').attr('opacity',0);
+  ar.append('text').attr('x',cx).attr('y',cy+4).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',30).text('⟹');
+  ar.append('text').attr('x',cx).attr('y',cy+24).attr('text-anchor','middle').attr('fill',C.gray).attr('font-size',10).text('negar + NNF');
+  ar.transition().delay(400).duration(350).attr('opacity',1);
+  // right box
+  const rb=g.append('g').attr('opacity',0);
+  rb.append('rect').attr('x',cx+45).attr('y',cy-48).attr('width',290).attr('height',96).attr('rx',12).attr('fill','rgba(250,179,135,.08)').attr('stroke',C.orange).attr('stroke-width',1.5);
+  rb.append('text').attr('x',cx+190).attr('y',cy-12).attr('text-anchor','middle').attr('fill',C.orange).attr('font-size',15).attr('font-family','Courier New').attr('font-weight','bold').text('¬φ = '+ex.neg_phi);
+  rb.append('text').attr('x',cx+190).attr('y',cy+14).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',11).text('Buscamos trazas que violan φ');
+  rb.transition().delay(700).duration(400).attr('opacity',1);
+  // bottom formula
+  const bf=g.append('g').attr('opacity',0);
+  bf.append('rect').attr('x',cx-290).attr('y',cy+80).attr('width',580).attr('height',40).attr('rx',8).attr('fill','rgba(137,180,250,.06)').attr('stroke','rgba(137,180,250,.2)').attr('stroke-width',1);
+  bf.append('text').attr('x',cx).attr('y',cy+105).attr('text-anchor','middle').attr('fill',C.white).attr('font-size',14).attr('font-family','Courier New').text('M ⊨ φ  ⟺  L(M) ∩ L(A¬φ) = ∅');
+  bf.transition().delay(1100).duration(400).attr('opacity',1);
+  // credit
+  const cr=g.append('text').attr('x',cx).attr('y',cy+158).attr('text-anchor','middle').attr('fill',C.gray).attr('font-size',10).attr('font-family','Courier New').attr('opacity',0)
+    .text('Gerth, Peled, Vardi, Wolper (1995) — mismo algoritmo que SPIN / LTL2BA');
+  cr.transition().delay(1400).duration(400).attr('opacity',1);
 }
 
 function renderBuchi(ex){
   clearSVG();
   const b=ex.buchi,n=b.n_states;
-  const pos=n===1?[{x:W/2,y:H/2}]:n===2?[{x:W/2-155,y:H/2},{x:W/2+155,y:H/2}]:circularPos(n,W/2,H/2,130);
-  drawGraph({nodes:Array.from({length:n},(_,i)=>`q${i}`),edges:b.transitions,pos,nodeR:42,
+  const pos=n===1?[{x:W/2,y:H/2}]:n===2?[{x:W/2-160,y:H/2},{x:W/2+160,y:H/2}]:circularPos(n,W/2,H/2,130);
+  drawGraph({nodes:Array.from({length:n}),edges:b.transitions,pos,nodeR:44,
     accepting:new Set(b.accepting),initial:b.initial,
     nodeColor:i=>b.accepting.includes(i)?C.yellow:C.blue,
-    edgeColor:()=>C.gray,edgeLabel:e=>e.guard,nodeText:i=>`q${i}`});
-  svg.append('text').attr('x',16).attr('y',H-14).attr('fill',C.sub).attr('font-size',10).text(`Büchi A(¬φ): ${n} estados, doble círculo = F (aceptación Büchi)`);
+    edgeLabel:e=>e.guard,nodeText:i=>`q${i}`,markerId:()=>'arr'});
+  svg.append('text').attr('x',16).attr('y',H-14).attr('fill',C.sub).attr('font-size',10).attr('opacity',0)
+    .text(`Büchi A(¬φ): ${n} estados · doble círculo = F · acepta trazas donde φ falla`)
+    .transition().delay(800).duration(400).attr('opacity',1);
 }
 
-function renderProduct(ex,prefixSet=new Set(),cycleSet=new Set(),prefixEdges=[],cycleEdges=[]){
+function renderProduct(ex){
   clearSVG();
-  const p=ex.product,n=p.states.length;
-  const pos=n<=5?circularPos(n,W/2,H/2,160):forcePos(p.states,p.transitions,W/2,H/2-10);
-  const pIds=new Set(Array.from(prefixSet).map(s=>p.states.findIndex(x=>x.k===s.k&&x.b===s.b)));
-  const cIds=new Set(Array.from(cycleSet).map(s=>p.states.findIndex(x=>x.k===s.k&&x.b===s.b)));
-  const peSet=new Set(prefixEdges.map(e=>`${e.from}-${e.to}`));
-  const ceSet=new Set(cycleEdges.map(e=>`${e.from}-${e.to}`));
-  drawGraph({nodes:p.states,edges:p.transitions,pos,nodeR:32,accepting:new Set(p.accepting),initial:p.initial[0],
-    nodeColor:i=>cIds.has(i)?C.red:pIds.has(i)?C.orange:(p.accepting.includes(i)?C.yellow:C.blue),
-    edgeColor:e=>{const k=`${e.from}-${e.to}`;return ceSet.has(k)?C.red:peSet.has(k)?C.orange:C.gray;},
-    edgeLabel:()=>'',nodeText:i=>prodLabel(p.states[i]),
-    markerSuffix:e=>{const k=`${e.from}-${e.to}`;return ceSet.has(k)?'-red':peSet.has(k)?'-orange':'';}
-  });
-  svg.append('text').attr('x',16).attr('y',H-14).attr('fill',C.sub).attr('font-size',10).text(`Producto M×A: ${n} estados, ${p.accepting.length} aceptantes (amarillo)`);
+  _cachedProductKey='';
+  const p=ex.product, pos=getProductPos(ex);
+  drawGraph({nodes:p.states,edges:p.transitions,pos,nodeR:32,
+    accepting:new Set(p.accepting),initial:p.initial[0],
+    nodeColor:i=>p.accepting.includes(i)?C.yellow:C.blue,
+    nodeText:i=>prodLabel(p.states[i]),markerId:()=>'arr'});
+  svg.append('text').attr('x',16).attr('y',H-14).attr('fill',C.sub).attr('font-size',10).attr('opacity',0)
+    .text(`Producto M×A: ${p.states.length} estados · ${p.accepting.length} aceptantes (amarillo) · ${p.transitions.length} transiciones`)
+    .transition().delay(1000).duration(400).attr('opacity',1);
 }
 
-function getCEEdges(ex,isPrefix){
-  const list=isPrefix?ex.counterexample.prefix:ex.counterexample.cycle;
+function ceEdges(ex,isPref){
+  const list=isPref?ex.counterexample.prefix:ex.counterexample.cycle;
   const edges=[];
   for(let i=0;i<list.length-1;i++){
     const a=ex.product.states.findIndex(s=>s.k===list[i].k&&s.b===list[i].b);
-    const b2=ex.product.states.findIndex(s=>s.k===list[i+1].k&&s.b===list[i+1].b);
-    if(a>=0&&b2>=0)edges.push({from:a,to:b2});
+    const b=ex.product.states.findIndex(s=>s.k===list[i+1].k&&s.b===list[i+1].b);
+    if(a>=0&&b>=0)edges.push({from:a,to:b});
   }
   return edges;
 }
 
+function renderProductBase(ex){
+  clearSVG();
+  const p=ex.product, pos=getProductPos(ex);
+  // draw base graph fast (no stagger, single fade)
+  const g=svg.append('g').attr('opacity',0);
+  const pairCnt={},pairIdx={};
+  p.transitions.forEach(e=>{const k=`${e.from}-${e.to}`;pairCnt[k]=(pairCnt[k]||0)+1;});
+  p.transitions.forEach(e=>{const k=`${e.from}-${e.to}`;pairIdx[k]=pairIdx[k]||0;});
+  p.transitions.forEach(e=>{
+    const k=`${e.from}-${e.to}`,rk=`${e.to}-${e.from}`;
+    const idx=pairIdx[k]++;
+    const hasRev=(pairCnt[rk]||0)>0;
+    const curv=hasRev?36:(pairCnt[k]>1?26*(idx-(pairCnt[k]-1)/2):0);
+    g.append('path').attr('d',edgePath(pos[e.from].x,pos[e.from].y,pos[e.to].x,pos[e.to].y,curv,32,e.from===e.to))
+      .attr('fill','none').attr('stroke',C.gray).attr('stroke-width',1.5).attr('marker-end','url(#arr)');
+  });
+  p.states.forEach((s,i)=>{
+    const{x,y}=pos[i],isAcc=p.accepting.includes(i);
+    if(isAcc) g.append('circle').attr('cx',x).attr('cy',y).attr('r',40).attr('fill','none').attr('stroke',C.yellow).attr('stroke-width',2.5);
+    g.append('circle').attr('cx',x).attr('cy',y).attr('r',32).attr('fill',p.accepting.includes(i)?C.yellow:C.blue).attr('stroke','#1e1e2e').attr('stroke-width',2.5);
+    const lbl=prodLabel(s),lines=lbl.split('\n');
+    lines.forEach((ln,li)=>g.append('text').attr('x',x).attr('y',y+(li-(lines.length-1)/2)*13+1).attr('text-anchor','middle').attr('dominant-baseline','middle').attr('fill','#1e1e2e').attr('font-size',9).attr('font-family','Courier New').attr('font-weight','bold').text(ln));
+  });
+  if(p.initial[0]!==undefined){
+    const{x,y}=pos[p.initial[0]],ang=-Math.PI*.72,D=65;
+    g.append('line').attr('x1',x+Math.cos(ang)*D).attr('y1',y+Math.sin(ang)*D).attr('x2',x+Math.cos(ang)*37).attr('y2',y+Math.sin(ang)*37).attr('stroke',C.green).attr('stroke-width',2.5).attr('marker-end','url(#arr-green)');
+  }
+  g.transition().duration(350).attr('opacity',1);
+  return pos;
+}
+
 function renderDFSOuter(ex){
   if(!ex.counterexample){renderProduct(ex);return;}
-  const pe=getCEEdges(ex,true);
-  renderProduct(ex,new Set(ex.counterexample.prefix),new Set(),pe,[]);
+  const pos=renderProductBase(ex);
+  const pe=ceEdges(ex,true);
+  // animate prefix path after base fades in
+  setTimeout(()=>{drawTracePath(pos,ex.product.states,32,pe,C.orange,'arr-orange',0,360);},400);
+  // highlight prefix nodes
+  const prefIdx=ex.counterexample.prefix.map(s=>ex.product.states.findIndex(x=>x.k===s.k&&x.b===s.b));
+  setTimeout(()=>{highlightNodes(pos,prefIdx,C.orange,32,0);},400+pe.length*360);
 }
 
 function renderDFSInner(ex){
   if(!ex.counterexample){renderProduct(ex);return;}
-  const pe=getCEEdges(ex,true),ce=getCEEdges(ex,false);
-  renderProduct(ex,new Set(ex.counterexample.prefix),new Set(ex.counterexample.cycle),pe,ce);
+  const pos=renderProductBase(ex);
+  const pe=ceEdges(ex,true), ce=ceEdges(ex,false);
+  // prefix fast
+  setTimeout(()=>{
+    drawTracePath(pos,ex.product.states,32,pe,C.orange,'arr-orange',0,160);
+  },300);
+  // cycle after prefix
+  const cycleStart=300+pe.length*160+200;
+  setTimeout(()=>{drawTracePath(pos,ex.product.states,32,ce,C.red,'arr-red',0,360);},cycleStart);
+  // highlight cycle nodes
+  const cycIdx=ex.counterexample.cycle.map(s=>ex.product.states.findIndex(x=>x.k===s.k&&x.b===s.b));
+  setTimeout(()=>{highlightNodes(pos,cycIdx,C.red,32,0);},cycleStart+ce.length*360);
 }
 
 function renderResult(ex){
   clearSVG();
   if(ex.result){
     renderKripke(ex);
-    const g=svg.append('g');
-    g.append('rect').attr('x',W/2-190).attr('y',16).attr('width',380).attr('height',64).attr('rx',12).attr('fill','#1d3a2a').attr('stroke',C.green).attr('stroke-width',2.5);
-    g.append('text').attr('x',W/2).attr('y',42).attr('text-anchor','middle').attr('fill',C.green).attr('font-size',20).attr('font-weight','bold').text('✅  VERIFICADO');
+    const g=svg.append('g').attr('opacity',0);
+    g.append('rect').attr('x',W/2-195).attr('y',14).attr('width',390).attr('height',66).attr('rx',13).attr('fill','#1d3a2a').attr('stroke',C.green).attr('stroke-width',2.5);
+    g.append('text').attr('x',W/2).attr('y',40).attr('text-anchor','middle').attr('fill',C.green).attr('font-size',20).attr('font-weight','bold').text('✅  VERIFICADO');
     g.append('text').attr('x',W/2).attr('y',66).attr('text-anchor','middle').attr('fill',C.sub).attr('font-size',11).text(`M ⊨ ${ex.phi}  en todos los comportamientos posibles`);
+    g.transition().delay(500).duration(500).ease(d3.easeBackOut).attr('opacity',1);
   } else {
-    const ce=ex.counterexample,hiS=new Set([...ce.prefix.map(s=>s.k),...ce.cycle.map(s=>s.k)]);
+    const hiS=new Set([...ex.counterexample.prefix.map(s=>s.k),...ex.counterexample.cycle.map(s=>s.k)]);
     renderKripke(ex,hiS);
-    const g=svg.append('g');
-    g.append('rect').attr('x',W/2-250).attr('y',12).attr('width',500).attr('height',66).attr('rx',12).attr('fill','#3a1d28').attr('stroke',C.red).attr('stroke-width',2.5);
-    g.append('text').attr('x',W/2).attr('y',36).attr('text-anchor','middle').attr('fill',C.red).attr('font-size',17).attr('font-weight','bold').text('❌  VIOLADO — Contraejemplo encontrado');
-    const pref=ce.prefix.map(s=>abbreviate(s.k)).join(' → ');
-    const cyc='('+ce.cycle.map(s=>abbreviate(s.k)).join(' → ')+')^ω';
+    const g=svg.append('g').attr('opacity',0);
+    g.append('rect').attr('x',W/2-255).attr('y',10).attr('width',510).attr('height',68).attr('rx',13).attr('fill','#3a1d28').attr('stroke',C.red).attr('stroke-width',2.5);
+    g.append('text').attr('x',W/2).attr('y',35).attr('text-anchor','middle').attr('fill',C.red).attr('font-size',17).attr('font-weight','bold').text('❌  VIOLADO — Contraejemplo encontrado');
+    const pref=ex.counterexample.prefix.map(s=>abbr(s.k)).join(' → ');
+    const cyc='('+ex.counterexample.cycle.map(s=>abbr(s.k)).join(' → ')+')^ω';
     g.append('text').attr('x',W/2).attr('y',62).attr('text-anchor','middle').attr('fill',C.orange).attr('font-size',10).attr('font-family','Courier New').text(pref+'  ·  '+cyc);
+    g.transition().delay(500).duration(500).ease(d3.easeBackOut).attr('opacity',1);
+  }
+}
+
+// ── UI ─────────────────────────────────────────────────────────────────────
+let activeTab='paso';
+function switchTab(tab){
+  activeTab=tab;
+  document.getElementById('pane-paso').classList.toggle('hidden',tab!=='paso');
+  document.getElementById('pane-algo').classList.toggle('hidden',tab!=='algo');
+  document.getElementById('tab-paso-btn').classList.toggle('active',tab==='paso');
+  document.getElementById('tab-algo-btn').classList.toggle('active',tab==='algo');
+  if(tab==='algo') syncAlgoHighlight();
+}
+
+function syncAlgoHighlight(){
+  for(let i=0;i<7;i++){
+    const el=document.getElementById(`astep-${i}`);
+    if(el) el.classList.toggle('current',i===stage);
   }
 }
 
@@ -297,14 +576,17 @@ function updateSidebar(){
   const rb=document.getElementById('result-block');
   if(stage===6){
     rb.style.display='';
-    document.getElementById('result-badge-wrap').innerHTML=ex.result?'<div class="result-badge ok">✅ Verificado</div>':'<div class="result-badge fail">❌ Violado</div>';
+    document.getElementById('result-badge-wrap').innerHTML=ex.result
+      ?'<div class="result-badge ok">✅ Verificado</div>'
+      :'<div class="result-badge fail">❌ Violado</div>';
     const ced=document.getElementById('ce-display');
     if(!ex.result&&ex.counterexample){
-      const pref=ex.counterexample.prefix.map(s=>abbreviate(s.k)).join(' → ');
-      const cyc=ex.counterexample.cycle.map(s=>abbreviate(s.k)).join(' → ');
+      const pref=ex.counterexample.prefix.map(s=>abbr(s.k)).join(' → ');
+      const cyc=ex.counterexample.cycle.map(s=>abbr(s.k)).join(' → ');
       ced.innerHTML=`<span class="pref">Prefijo: ${pref}</span><br><span class="cyc">Ciclo: (${cyc})^ω</span>`;
     } else ced.innerHTML='';
   } else rb.style.display='none';
+  syncAlgoHighlight();
 }
 
 function updateDots(){
@@ -324,7 +606,7 @@ function updateTabs(){
     const b=document.createElement('button');
     b.className='example-tab'+(i===exIdx?' active':'');
     b.textContent=ex.name;
-    b.onclick=()=>{if(autoTimer)toggleAuto();exIdx=i;stage=0;render();};
+    b.onclick=()=>{if(autoTimer)toggleAuto();exIdx=i;stage=0;_cachedProductKey='';render();};
     c.appendChild(b);
   });
 }
@@ -339,7 +621,10 @@ function render(){
   document.getElementById('btn-next').disabled=stage===STAGE_DEFS.length-1;
 }
 
-function gotoStage(n){stage=Math.max(0,Math.min(STAGE_DEFS.length-1,n));render();}
+function gotoStage(n){
+  stage=Math.max(0,Math.min(STAGE_DEFS.length-1,n));
+  render();
+}
 
 function toggleAuto(){
   const btn=document.getElementById('btn-auto');
@@ -348,11 +633,11 @@ function toggleAuto(){
     btn.textContent='▶ Auto';btn.classList.remove('playing');
   } else {
     btn.textContent='⏸ Pausar';btn.classList.add('playing');
-    const speed=parseInt(document.getElementById('speed-slider').value);
+    const spd=parseInt(document.getElementById('speed-slider').value);
     autoTimer=setInterval(()=>{
       if(stage<STAGE_DEFS.length-1){stage++;render();}
       else{toggleAuto();}
-    },speed);
+    },spd);
   }
 }
 
